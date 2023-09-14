@@ -1,0 +1,31 @@
+Size
+FloorHeight=3000,SlabThick=50,PanelWidth=450,BottomSplitHeight=2700,HrPanelForDoorWindowAndBeam=True,SL=125,Kicker=200,RC=50,Max.SLLength=2000,PanelWithoutRC=True
+Annotation
+WallPanel=WP,WallTopPanel=TP,WindowWallPanel=WWP,WindowTopPanel=WTP,DoorTopPanel=DTP,BeamPanel=BS,DeckPanel=SP,SlabJointPanel=SJ,BeamSideAngle=BA
+Window
+Layer=AEE_Window1,SillLevel=950,LintelLevel=2200
+Layer=AEE_Window2,SillLevel=1250,LintelLevel=2200
+Door
+Layer=AEE_Door1,LintelLevel=2100
+Layer=AEE_Door2,LintelLevel=1900
+Beam
+Layer=AEE_OffsetBeam1,BeamBottom=2700,BeamTop=Up to slab
+Layer=AEE_OffsetBeam2,BeamBottom=2500,BeamTop=Up to slab
+InternalSunkanSlab
+Layer=AEE_InternalSunkanSlab1,LevelDiffernce=60,SlabThickness=150
+Layer=AEE_InternalSunkanSlab2,LevelDiffernce=120,SlabThickness=150
+ExternalSunkanSlab
+Layer=AEE_ExternalSunkanSlab1,LevelDiffernce=60,SlabThickness=150
+Layer=AEE_ExternalSunkanSlab2,LevelDiffernce=120,SlabThickness=150
+Parapet
+Layer=AEE_Parapet1,ParapetBottom=Up to slab,ParapetTop=1000
+Layer=AEE_Parapet2,ParapetBottom=Up to slab,ParapetTop=1200
+Staircase
+Layer=AEE_StairCase1
+Layer=AEE_StairCase2
+Lift
+Layer=AEE_Lift1
+Layer=AEE_Lift2
+InternalWallSlab
+Layer=AEE_IC_Wall1,WallSlabBottom=2700
+Layer=AEE_IC_Wall2,WallSlabBottom=2950

@@ -1,0 +1,461 @@
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Windows;
+using PanelLayout_App.Licensing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Forms;
+using System.IO;
+using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.Runtime.InteropServices;
+using PanelLayout_App.WallModule;
+using PanelLayout_App.ElevationModule;
+
+[assembly: ExtensionApplication(null)]
+[assembly: CommandClass(typeof(PanelLayout_App.CommandModule))]
+
+namespace PanelLayout_App
+{
+    public class CommandModule
+    {
+        public static string licFileNameWithPath = "";
+        public static PaletteSet paletteSet = null;
+        public static bool dply = false;
+        string msg = "Patent Pending" + Environment.NewLine + "www.aneeindia.com";
+        public void PaletteCommands()
+        {
+            string panelLayoutName = "PANEL LAYOUT";
+            if (paletteSet == null)
+            {
+                var doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+                if (doc == null) return;
+                var ed = doc.Editor;
+
+                //Guid newGuid = new Guid();
+                //paletteSet = new PaletteSet(panelLayoutName, newGuid);
+
+                paletteSet = new PaletteSet(panelLayoutName, new Guid("C83C28AF-4CE2-4258-B4C0-D5915F43C174"));
+                paneLayoutUISetting = new PanelLayout_UI();
+
+                paletteSet.Add(panelLayoutName, paneLayoutUISetting);
+                //paletteSet.MinimumSize = new System.Drawing.Size(400, 400);
+                paletteSet.DockEnabled = (DockSides)(DockSides.Left | DockSides.Bottom | DockSides.Right);
+
+                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.DocumentActivated += DocumentManager_DocumentActivated;
+                //paletteSet.Size = new System.Drawing.Size(500, 500);
+            }
+            else if (paneLayoutUISetting != null)
+            {
+                paneLayoutUISetting.LoadSettings();
+            }
+            paletteSet.Visible = true;
+        }
+
+        private void DocumentManager_DocumentActivated(object sender, DocumentCollectionEventArgs e)
+        {
+            if (paletteSet != null && paneLayoutUISetting != null && paletteSet.Visible && e.Document != null)
+            {
+                paneLayoutUISetting.LoadSettings();
+            }
+        }
+
+        PanelLayout_UI panelLayout_UI = new PanelLayout_UI();
+        private static PanelLayout_UI paneLayoutUISetting;
+
+        [CommandMethod("DPLY")]
+        public void DebugPlay()
+        {
+            dply = true;
+
+            System.Windows.Forms.MessageBox.Show(msg, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            checkCornerCommandMethod();
+            createCornerCommandMethod();
+            insertCornerCommandMethod();
+            insertWallPanelCommandMethod();
+            insertDeckPanelCommandMethod();
+            createElevation();
+            //createHolecenterline();
+            //Added on 10/07/2023 by SDM
+            RibbonHelper.updateWallButton.IsEnabled = true;
+            RibbonHelper.rebuildPanelButton.IsEnabled = true;
+            dply = false;
+        }
+
+
+        [CommandMethod("PLR")]
+        public void callMethodOfRibbon()
+        {
+            if (RibbonHelper.countOfRibbonCreator == 0)
+            {
+                CommonModule.setCornerVariableValue();
+                System.Windows.Forms.MessageBox.Show(msg, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RibbonHelper ribbonHelper = new RibbonHelper();
+                ribbonHelper.CreateRibbon();
+                RibbonHelper.countOfRibbonCreator++;
+                RibbonHelper.checkShellPlanButton.IsEnabled = true;
+                RibbonHelper.createShellPlanButton.IsEnabled = false;
+                RibbonHelper.insertCornerButton.IsEnabled = false;
+                RibbonHelper.insertPanelButton.IsEnabled = false;
+                RibbonHelper.insertDeckPanelButton.IsEnabled = false;
+                RibbonHelper.createHolecenterlineButton.IsEnabled = false;
+                RibbonHelper.createElevationPlanButton.IsEnabled = false;
+                RibbonHelper.rebuildPanelButton.IsEnabled = false;
+                RibbonHelper.updateWallButton.IsEnabled = false;//Added on 10/06/2023 by SDM
+                RibbonHelper.createBOMButton.IsEnabled = false;
+            }
+        }
+
+        [CommandMethod("PLSETTING")]
+        public void callMethodOfPanelOption()
+        {
+            CommonModule.setCornerVariableValue();
+
+            PaletteCommands();
+        }
+
+
+
+        [CommandMethod("GAREA")]
+        public void GAREA()
+        {
+            var ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+            var res = ed.GetEntity("Select Entity : ");
+            if (res.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            var pts = new Point3dCollection();
+            var obj = res.ObjectId.Open(OpenMode.ForRead);
+            if (obj != null)
+            {
+                var pl = obj as Polyline;
+
+                for (var n = 0; n < pl.NumberOfVertices; ++n)
+                {
+                    var pt = pl.GetPoint3dAt(n);
+                    pts.Add(pt);
+                }
+                if (pl.Closed)
+                {
+                    pts.Add(pl.GetPoint3dAt(0));
+                }
+                obj.Close();
+            }
+            RectangleAreaFinder.CreateRecngle1(pts, "0", 1, true, 10);
+        }
+
+        [CommandMethod("CHECKSHELLPLAN")]
+        public void checkCornerCommandMethod()
+        {
+            CommonModule commonModule = new CommonModule();
+            var flag = commonModule.checkLicenseFile();
+            if (flag == false)
+            {
+                return;
+            }
+            panelLayout_UI.callMethodOfDefaultValue();
+
+            CommonModule.setCornerVariableValue();
+            CheckShellPlanHelper checkShellPlanHelper_Obj = new CheckShellPlanHelper();
+            checkShellPlanHelper_Obj.commandMethodOfCheckShellPlan();
+        }
+
+        [CommandMethod("READDATA")]
+        public void callMethodOftext()
+        {
+
+            var ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+
+            PanelLayoutInputHelper panelLayoutInputHlp = new PanelLayoutInputHelper();
+            panelLayoutInputHlp.selectPanelLayoutWithWindowSelection_Text("Select Entity");//Changes made on 19/06/2023 by PRT
+
+        }
+
+        [CommandMethod("CREATESHELLPLAN")]
+        public void createCornerCommandMethod()
+        {
+            CheckShellPlanHelper checkShellPlanHelper_Obj = new CheckShellPlanHelper();
+            var flagOfDoc = checkShellPlanHelper_Obj.checkShellPlanCommand_DocumentIsSame();
+            if (flagOfDoc == false)
+            {
+                return;
+            }
+            CommonModule.textvalue = new List<string>();
+            CreateShellPlanHelper createShellPlanHelper_Obj = new CreateShellPlanHelper();
+            createShellPlanHelper_Obj.commandMethodOfCreateShellPlan();
+        }
+
+        [CommandMethod("CREATEELEVATIONPLAN")]
+        public void createElevation()
+        {
+            ElevationHelper elevHlp = new ElevationHelper();
+            elevHlp.CreateElevation();
+#if !WNPANEL
+            RibbonHelper.createHolecenterlineButton.IsEnabled = true;
+#endif
+            System.Windows.Forms.MessageBox.Show("Elevation Plan is created!", CommonModule.headerText_messageBox, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        [CommandMethod("AEE_HoleCenterlines")]
+        public void createHolecenterline()
+        {
+            RibbonHelper.createHolecenterlineButton.IsEnabled = false;
+            HoleCenterlineCreation holecenterlinecreation = new HoleCenterlineCreation();
+            holecenterlinecreation.createCline();
+            System.Windows.MessageBox.Show("Hole Centerlines are created!");
+        }
+
+        [CommandMethod("INSERTCORNER")]
+        public void insertCornerCommandMethod()
+        {
+            CheckShellPlanHelper checkShellPlanHelper_Obj = new CheckShellPlanHelper();
+            var flagOfDoc = checkShellPlanHelper_Obj.checkShellPlanCommand_DocumentIsSame();
+            if (flagOfDoc == false)
+            {
+                return;
+            }
+            CornerHelper cornerHelper = new CornerHelper();
+            cornerHelper.callMethodOfInsertCornerHelper();
+        }
+
+        [CommandMethod("INSERTWALLPANEL")]
+        public void insertWallPanelCommandMethod()
+        {
+            CheckShellPlanHelper checkShellPlanHelper_Obj = new CheckShellPlanHelper();
+            var flagOfDoc = checkShellPlanHelper_Obj.checkShellPlanCommand_DocumentIsSame();
+            if (flagOfDoc == false)
+            {
+                return;
+            }
+            WallPanelHelper wallPanel_Obj = new WallPanelHelper();
+            wallPanel_Obj.callMethodOfWallPanel();
+        }
+
+        [CommandMethod("INSERTDECKPANEL")]
+        public void insertDeckPanelCommandMethod()
+        {
+            CheckShellPlanHelper checkShellPlanHelper_Obj = new CheckShellPlanHelper();
+            var flagOfDoc = checkShellPlanHelper_Obj.checkShellPlanCommand_DocumentIsSame();
+            if (flagOfDoc == false)
+            {
+                return;
+            }
+
+            DeckPanelHelper deckPanelHlp = new DeckPanelHelper();
+            deckPanelHlp.drawDeckPlatePanel();
+        }
+
+        [CommandMethod("AEE_Rebuild")]
+        public void rebuildCommandMethod()
+        {
+            CheckShellPlanHelper checkShellPlanHelper_Obj = new CheckShellPlanHelper();
+            var flagOfDoc = checkShellPlanHelper_Obj.checkShellPlanCommand_DocumentIsSame();
+            if (flagOfDoc == false)
+            {
+                return;
+            }
+            RebuildHelper rebuildHlp = new RebuildHelper();
+            rebuildHlp.callMethodOfRebuild();
+        }
+        //Added on 10/06/2023 by SDM
+        [CommandMethod("AEE_Update")]
+        public void updateWallBOMCommandMethod()
+        {
+            CheckShellPlanHelper checkShellPlanHelper_Obj = new CheckShellPlanHelper();
+            var flagOfDoc = checkShellPlanHelper_Obj.checkShellPlanCommand_DocumentIsSame();
+            if (flagOfDoc == false)
+            {
+                return;
+            }
+            RebuildHelper rebuildHlp = new RebuildHelper();
+            rebuildHlp.callMethodOfUpdate();
+        }
+
+        [CommandMethod("CREATEBOM")]
+        public void createBOMCommandMethod()
+        {
+            CheckShellPlanHelper checkShellPlanHelper_Obj = new CheckShellPlanHelper();
+            var flagOfDoc = checkShellPlanHelper_Obj.checkShellPlanCommand_DocumentIsSame();
+            if (flagOfDoc == false)
+            {
+                return;
+            }
+            RibbonHelper.createBOMButton.IsEnabled = false;
+
+            BOMHelper bomHlp = new BOMHelper();
+            bomHlp.callMethodOfBOMExport();
+
+            RibbonHelper.checkShellPlanButton.IsEnabled = true;
+        }
+
+        [CommandMethod("CLEARDATA")]
+        public void clearDataCommandMethod()
+        {
+            AEE_Utility.RemoveXDataName(CommonModule.xDataAsciiName);
+
+            RibbonHelper.checkShellPlanButton.IsEnabled = true;
+            RibbonHelper.createShellPlanButton.IsEnabled = false;
+            RibbonHelper.insertCornerButton.IsEnabled = false;
+            RibbonHelper.insertPanelButton.IsEnabled = false;
+            RibbonHelper.insertDeckPanelButton.IsEnabled = false;
+            RibbonHelper.createElevationPlanButton.IsEnabled = false;
+            RibbonHelper.createHolecenterlineButton.IsEnabled = false;
+            RibbonHelper.rebuildPanelButton.IsEnabled = false;
+            RibbonHelper.updateWallButton.IsEnabled = false;//Added on 10/06/2023 by SDM
+            RibbonHelper.createBOMButton.IsEnabled = false;
+        }
+
+
+
+
+
+        ////    [CommandMethod("GBP", CommandFlags.Session)]
+        //// 
+        //static public void GenerateBlockPreviews()
+        ////    {
+        ////        Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+
+        ////        PromptFileNameResult res =  ed.GetFileNameForOpen("Select file for which to generate previews");
+        ////        if (res.Status != PromptStatus.OK)
+        ////            return;
+        ////        Document doc = null;
+        ////        try
+        ////        {
+        ////            doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(res.StringResult, false);
+        ////        }
+        ////        catch
+        ////        {
+        ////            ed.WriteMessage("\nUnable to read drawing.");
+        ////            return;
+        ////        }
+
+        ////        Database db = doc.Database;
+
+        ////        string path = Path.GetDirectoryName(res.StringResult), name = Path.GetFileName(res.StringResult), iconPath = path + "\\" + name + " icons";
+
+        ////        int numIcons = 0;
+
+        ////        Transaction tr = doc.TransactionManager.StartTransaction();
+        ////        using (tr)
+        ////        {
+        ////            BlockTable table = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
+
+        ////            foreach (ObjectId blkId in table)
+        ////            {
+        ////                BlockTableRecord blk = (BlockTableRecord)tr.GetObject(blkId, OpenMode.ForRead);
+
+        ////                // Ignore layouts and anonymous blocks
+        ////                if (blk.IsLayout || blk.IsAnonymous)
+        ////                    continue;
+
+        ////                // Attempt to generate an icon, where one doesn't exist
+
+        ////                if (blk.PreviewIcon == null)
+        ////                {
+        ////                    object ActiveDocument = doc.GetAcadDocument();
+        ////                    object[] data = { "_.BLOCKICON " + blk.Name + "\n" };
+        ////                    ActiveDocument.GetType().InvokeMember("SendCommand", System.Reflection.BindingFlags.InvokeMethod, null, ActiveDocument, data);
+        ////                }
+
+        ////                // Hopefully we now have an icon
+
+        ////                if (blk.PreviewIcon != null)
+        ////                {
+        ////                    // Create the output directory, if it isn't yet there
+
+        ////                    if (!Directory.Exists(iconPath))
+        ////                        Directory.CreateDirectory(iconPath);
+
+        ////                    // Save the icon to our out directory
+
+        ////                    blk.PreviewIcon.Save(iconPath + "\\" + blk.Name + ".bmp");
+
+        ////                    // Increment our icon counter
+
+        ////                    numIcons++;
+        ////                }
+        ////            }
+        ////            tr.Commit();
+        ////        }
+        ////        doc.CloseAndDiscard();
+
+        ////        ed.WriteMessage("\n{0} block icons saved to \"{1}\".", numIcons, iconPath);
+        ////    }
+
+
+
+
+        ////    [DllImport("acad.exe",
+        ////CharSet = CharSet.Unicode,
+        ////CallingConvention = CallingConvention.Cdecl,
+        ////EntryPoint = "acedCommand")]
+        ////    private static extern int acedCommand(
+        ////int type1,
+        ////string command,
+        ////int type2,
+        ////string blockName,
+        ////int end);
+
+        ////    [CommandMethod("BlkPreview")]
+        ////    static public void BlkPreview()
+        ////    {
+        ////        Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+        ////        Database db = doc.Database;
+        ////        Editor ed = doc.Editor;
+
+        ////        PromptStringOptions pso = new PromptStringOptions(
+        ////            "\nEnter block name: ");
+
+        ////        PromptResult pr = ed.GetString(pso);
+
+        ////        if (pr.Status != PromptStatus.OK)
+        ////            return;
+
+        ////        using (Transaction Tx = db.TransactionManager.StartTransaction())
+        ////        {
+        ////            BlockTable table = Tx.GetObject(
+        ////                db.BlockTableId,
+        ////                OpenMode.ForRead)
+        ////                    as BlockTable;
+
+        ////            if (!table.Has(pr.StringResult) == true)
+        ////            {
+        ////                ed.WriteMessage(
+        ////                    "\nNo block with name " + pr.StringResult);
+        ////                return;
+        ////            }
+
+        ////            BlockTableRecord blk = Tx.GetObject(
+        ////                table[pr.StringResult],
+        ////                OpenMode.ForRead)
+        ////                    as BlockTableRecord;
+
+        ////            if (blk.PreviewIcon == null)
+        ////            {
+        ////                acedCommand(
+        ////                    5005,
+        ////                    "BLOCKICON",
+        ////                    5005,
+        ////                    pr.StringResult,
+        ////                    5000);
+        ////            }
+
+        ////            //blk.PreviewIcon.Save(
+        ////            //    "c:\\Temp\\" + pr.StringResult + ".bmp");
+
+        ////            Tx.Commit();
+        ////        }
+        ////    }
+
+
+    }
+}

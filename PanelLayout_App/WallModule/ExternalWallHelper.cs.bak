@@ -1,0 +1,338 @@
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using PanelLayout_App.CivilModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static PanelLayout_App.RotationHelper;
+
+namespace PanelLayout_App.WallModule
+{
+    public class ExternalWallHelper
+    {
+        public static List<ObjectId> listOfExternalWallObjId = new List<ObjectId>();
+        public static List<List<ObjectId>> listOfListOfExternalWallRoomLineId_With_WallName = new List<List<ObjectId>>();
+
+
+        private static List<Point3d> listOfExternalWallCorner_Points_EvenNo = new List<Point3d>();
+        private static List<ObjectId> listOfExternalWallCorner_ObjId_EvenNo = new List<ObjectId>();
+        private static List<List<ObjectId>> listOfExternalWallCornerText_ObjId_EvenNo = new List<List<ObjectId>>();
+        private static List<Point3d> listOfExternalWallCorner_Points_OddNo = new List<Point3d>();
+        private static List<ObjectId> listOfExternalWallCorner_ObjId_OddNo = new List<ObjectId>();
+        private static List<List<ObjectId>> listOfExternalWallCornerText_ObjId_OddNo = new List<List<ObjectId>>();
+
+        public static List<Point3d> listOfAllExternalWallCorner_Points = new List<Point3d>();
+        public static List<ObjectId> listOfAllExternalWallCorner_ObjId = new List<ObjectId>();
+        public static List<List<ObjectId>> listOfAllExternalWallCornerText_ObjId = new List<List<ObjectId>>();
+
+
+        public void callMethodExternalWall(ProgressForm progressForm, string cornerCreationMsg)
+        {
+            if (listOfExternalWallObjId.Count != 0)
+            {
+                drawInternalCorner_In_ExternalWall(progressForm, cornerCreationMsg, listOfExternalWallObjId, listOfListOfExternalWallRoomLineId_With_WallName);
+            }
+        }
+
+
+        private void drawInternalCorner_In_ExternalWall(ProgressForm progressForm, string cornerCreationMsg, List<ObjectId> listOfExtrnlWallObjId, List<List<ObjectId>> listOfListOfRoomLineId_With_WallName)
+        {
+            KickerHelper kickerHlp = new KickerHelper(DoorHelper.listDoorLines);
+            //KickerHelper kickerHlp = new KickerHelper();
+            InternalWallHelper internalWall_Obj = new InternalWallHelper();
+            CornerHelper cornerHlpr = new CornerHelper();
+            CommonModule common_Obj = new CommonModule();
+
+            for (int index = 0; index < listOfExternalWallObjId.Count; index++)
+            {
+                int evenCount = 0;
+                int oddCount = 0;
+                listOfExternalWallCorner_Points_EvenNo.Clear();
+                listOfExternalWallCorner_ObjId_EvenNo.Clear();
+                listOfExternalWallCornerText_ObjId_EvenNo.Clear();
+                listOfAllExternalWallCorner_Points.Clear();
+                listOfAllExternalWallCorner_ObjId.Clear();
+                listOfAllExternalWallCornerText_ObjId.Clear();
+                listOfExternalWallCorner_Points_OddNo.Clear();
+                listOfExternalWallCorner_ObjId_OddNo.Clear();
+                listOfExternalWallCornerText_ObjId_OddNo.Clear();
+                ObjectId externalWall_Id = listOfExternalWallObjId[index];
+                ObjectId outsideOffsetWallId = drawOffsetExternalWall(externalWall_Id);
+                if (outsideOffsetWallId.IsValid == true)
+                {
+                    var externalWallEnt = AEE_Utility.GetEntityForRead(externalWall_Id);
+
+                    ObjectId insideOffsetWallId = internalWall_Obj.drawOffsetInternalWall(externalWall_Id, 1);
+                    List<ObjectId> listOfInsideOffsetWallLineId = AEE_Utility.ExplodeEntity(insideOffsetWallId);
+
+                    ObjectId sunkanSlabId = new ObjectId(); // sunkan slab is not for external wall
+                    List<ObjectId> listOfOutsideOffsetWallLineId = AEE_Utility.ExplodeEntity(outsideOffsetWallId);
+
+                    List<ObjectId> listOfExplodeIds = listOfListOfRoomLineId_With_WallName[index];
+                    int listItemCount = listOfExplodeIds.Count;
+
+                    ObjectId lastWallLineId_With_RoomName = new ObjectId();
+
+                    for (int j = 0; j < listItemCount; j++)
+                    {
+                        lastWallLineId_With_RoomName = listOfExplodeIds[(listOfExplodeIds.Count - 1)];
+
+                        ObjectId wallLineId_With_RoomName = getXDataRegisteredAppName_ExternalWall(j, listOfExplodeIds);
+                        var xDataRegAppName = AEE_Utility.GetXDataRegisterAppName(wallLineId_With_RoomName);
+                        kickerHlp.callMethodOfExternalKickerCorner(j, wallLineId_With_RoomName, lastWallLineId_With_RoomName, externalWall_Id, listOfExplodeIds, insideOffsetWallId, listOfInsideOffsetWallLineId, outsideOffsetWallId, listOfOutsideOffsetWallLineId, sunkanSlabId);
+
+                        ObjectId lineId = listOfExplodeIds[j];
+
+                        if ((j % 25) == 0)
+                        {
+                            progressForm.ReportProgress(1, cornerCreationMsg);
+                        }
+
+                        var listOfStrtEndPoint = AEE_Utility.getStartEndPointWithAngle_Line(lineId);
+
+                        PartHelper partHelper = new PartHelper();
+                        double intrnlCornr_StartX = listOfStrtEndPoint[0];
+                        double intrnlCornr_StartY = listOfStrtEndPoint[1];
+                        double angleOfLine = listOfStrtEndPoint[4];
+                        CommonModule.basePoint = new Point3d(intrnlCornr_StartX, intrnlCornr_StartY, 0);
+
+                        var flagOfAngleBtw = common_Obj.checkAngleBetweenTwoLines(j, angleOfLine, listOfExplodeIds);
+                        if (flagOfAngleBtw == true)
+                        {
+                            bool flagOfInside = false;
+                            double rotationAngle = 0;
+                            common_Obj.checkInternalCornerIsInside_Innerwall(xDataRegAppName, externalWall_Id, CommonModule.basePoint, angleOfLine, outsideOffsetWallId, out flagOfInside, out rotationAngle);
+                            if (flagOfInside == true)
+                            {
+                                var intrnlCrnr_ObjId = partHelper.drawInternalCorner(xDataRegAppName, intrnlCornr_StartX, intrnlCornr_StartY, CommonModule.intrnlCornr_Flange1, CommonModule.intrnlCornr_Flange2, CommonModule.panelDepth, CommonModule.internalCornerThick, CommonModule.panelDepth, CommonModule.internalCornerLyrName, CommonModule.internalCornerLyrColor, rotationAngle);
+
+                                var pts = AEE_Utility.GetPolyLinePointList(intrnlCrnr_ObjId);
+
+                                AEE_Utility.AttachXData(intrnlCrnr_ObjId, xDataRegAppName, CommonModule.xDataAsciiName);
+                                AEE_Utility.AttachXData(intrnlCrnr_ObjId, xDataRegAppName + "_1", CommonModule.intrnlCornr_Flange1.ToString() + "," +
+                                                                                                  CommonModule.intrnlCornr_Flange2.ToString() + "," +
+                                                                                                  CommonModule.panelDepth.ToString() + "," +
+                                                                                                  CommonModule.internalCornerThick.ToString() + "," +
+                                                                                                  CommonModule.panelDepth.ToString());
+
+                                /*CommonModule.rotateAngle = (rotationAngle * Math.PI) / 180; // variable assign for rotation*/
+                                List<ObjectId> listOfObjId = new List<ObjectId>();
+                                listOfObjId.Add(intrnlCrnr_ObjId);
+                                /*MoveRorationScaleJig.RotationScaleJig_Method(listOfObjId);*/
+                                CornerElevation elev = new CornerElevation(xDataRegAppName, AEE_Utility.GetXDataRegisterAppName(lineId), AEE_Utility.GetLengthOfLine(wallLineId_With_RoomName), 0, 0);
+                                var flagOfInternalCorner = common_Obj.checkInternalCornerIntersectTheTwoLines(j, intrnlCrnr_ObjId, listOfOutsideOffsetWallLineId);
+                                if (flagOfInternalCorner == false)
+                                {
+                                    AEE_Utility.deleteEntity(listOfObjId);
+                                    var flagOfExternalDwg = drawExternalCorner_In_ExternallWall(externalWallEnt.Layer, xDataRegAppName, externalWall_Id, CommonModule.basePoint, angleOfLine, outsideOffsetWallId, j, listOfOutsideOffsetWallLineId, sunkanSlabId, elev);
+                                }
+                                else
+                                {
+                                    InternalWallHelper.lstCornerData.Add(new CornerData(pts[1], pts[pts.Count - 3]) { idCorner = intrnlCrnr_ObjId, ptCorner = CommonModule.basePoint, angleOfLine = rotationAngle, Length1 = CommonModule.intrnlCornr_Flange1, Length2 = CommonModule.intrnlCornr_Flange2, });
+                                    listOfExternalWallCorner_Points_EvenNo.Add(CommonModule.basePoint);
+                                    listOfExternalWallCorner_ObjId_EvenNo.Add(intrnlCrnr_ObjId);
+
+                                    listOfExternalWallCorner_Points_OddNo.Add(CommonModule.basePoint);
+                                    listOfExternalWallCorner_ObjId_OddNo.Add(intrnlCrnr_ObjId);
+
+                                    listOfAllExternalWallCorner_Points.Add(CommonModule.basePoint);
+                                    listOfAllExternalWallCorner_ObjId.Add(intrnlCrnr_ObjId);
+                                    double beamBottom = 0;
+                                    double ICCornerHght = GeometryHelper.getHeightOfWall_EC_IC_ExternallWall(externalWallEnt.Layer, InternalWallSlab_UI_Helper.getSlabBottom(externalWallEnt.Layer), beamBottom, PanelLayout_UI.getSlabThickness(externalWallEnt.Layer), PanelLayout_UI.RC, PanelLayout_UI.kicker, CommonModule.internalCorner, sunkanSlabId);
+                                    var lstTemp = new List<List<object>>();
+                                    List<string> listOfcornerTexts = CornerHelper.UpdateCornerText(lstTemp, ICCornerHght, sunkanSlabId);
+                                    double crnerRotationAngle = rotationAngle + CommonModule.cornerRotationAngle;
+                                    List<ObjectId> textIds = cornerHlpr.writeMultipleTextInCorner(intrnlCrnr_ObjId, listOfcornerTexts, crnerRotationAngle, CommonModule.internalCornerTextLyrName, CommonModule.internalCornerLyrColor);
+
+                                    cornerHlpr.setInternalCornerForStretch(intrnlCrnr_ObjId, textIds);
+                                   double _elev = 0;//Fix elevation when wall Ht more than 3000 by SDM 2022-07-18
+                                    for (int i = 0; i < lstTemp.Count; i++)
+                                    {
+                                        elev.elev= _elev;//Fix elevation when wall Ht more than 3000 by SDM 2022-07-18
+                                        CornerElevation elevation = new CornerElevation(xDataRegAppName, AEE_Utility.GetXDataRegisterAppName(lineId), AEE_Utility.GetLengthOfLine(wallLineId_With_RoomName), 0, _elev);//Fix elevation when wall Ht more than 3000 by SDM 2022-07-18
+                                        CornerHelper.setCornerDataForBOM(xDataRegAppName, intrnlCrnr_ObjId, textIds[i], listOfcornerTexts[i], CommonModule.internalCornerDescp, CornerHelper.getInternalCornerCode(), CommonModule.intrnlCornr_Flange1, CommonModule.intrnlCornr_Flange2, Convert.ToDouble(lstTemp[i][4]), elevation);
+                                        _elev += Convert.ToDouble(lstTemp[i][4]);//Fix elevation when wall Ht more than 3000 by SDM 2022-07-18
+                                    }
+
+                                    listOfExternalWallCornerText_ObjId_EvenNo.Add(textIds);
+                                    listOfExternalWallCornerText_ObjId_OddNo.Add(textIds);
+                                    listOfAllExternalWallCornerText_ObjId.Add(textIds);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var circleId = AEE_Utility.CreateCircle(intrnlCornr_StartX, intrnlCornr_StartY, 0, (CommonModule.intrnlCornr_Flange1 / 2), CommonModule.internalCornerLyrName, 1);
+                            AEE_Utility.changeColor(circleId, InternalWallHelper.nonStandardColorIndex);
+                            InternalWallHelper.listOfNonPerpendiculareLine.Add(lineId);
+
+                            listOfExternalWallCorner_Points_EvenNo.Clear();
+                            listOfExternalWallCorner_ObjId_EvenNo.Clear();
+                            listOfExternalWallCornerText_ObjId_EvenNo.Clear();
+                            listOfExternalWallCorner_Points_OddNo.Clear();
+                            listOfExternalWallCorner_ObjId_OddNo.Clear();
+                            listOfExternalWallCornerText_ObjId_OddNo.Clear();
+                        }
+                        oddCount++;
+                        evenCount++;
+
+                        internalWall_Obj.setWallPanelPoint(index, wallLineId_With_RoomName, evenCount, listOfExternalWallCorner_ObjId_EvenNo, listOfExternalWallCornerText_ObjId_EvenNo, listOfExternalWallCorner_Points_EvenNo, oddCount, listOfExternalWallCorner_ObjId_OddNo, listOfExternalWallCornerText_ObjId_OddNo, listOfExternalWallCorner_Points_OddNo, outsideOffsetWallId, externalWall_Id, false, sunkanSlabId);
+                    }
+
+                    internalWall_Obj.setWallPanelPoint_In_LastVertex_Wall(lastWallLineId_With_RoomName, listOfAllExternalWallCorner_ObjId, listOfAllExternalWallCornerText_ObjId, listOfAllExternalWallCorner_Points, listOfOutsideOffsetWallLineId, outsideOffsetWallId, externalWall_Id, false, sunkanSlabId);
+
+                    BeamHelper beamHlp = new BeamHelper();
+                    beamHlp.setBeamBottomWallLineRoomWise();
+
+                    //AEE_Utility.deleteEntity(listOfExplodeIds);
+                    AEE_Utility.deleteEntity(outsideOffsetWallId);
+                    AEE_Utility.deleteEntity(listOfOutsideOffsetWallLineId);
+                }
+            }
+        }
+
+
+        private bool drawExternalCorner_In_ExternallWall(string wallLayerName, string xDataRegAppName, ObjectId internalWall_Id, Point3d basepoint, double angleOfLine, ObjectId offsetInterwall_ObjId, int index, List<ObjectId> listOfOffsetWall_Ids, ObjectId sunkanSlabId, CornerElevation elev)
+        {
+            CornerHelper cornerHlpr = new CornerHelper();
+            bool flagOfExternalDwg = false;
+            double rotationAngle = 0;
+            CommonModule common_Obj = new CommonModule();
+            common_Obj.checkExternalCornerIsInside_Innerwall(xDataRegAppName, internalWall_Id, basepoint, angleOfLine, offsetInterwall_ObjId, index, listOfOffsetWall_Ids, out flagOfExternalDwg, out rotationAngle);
+            if (flagOfExternalDwg == true)
+            {
+                PartHelper partHelper = new PartHelper();
+                CommonModule.rotateAngle = (rotationAngle * Math.PI) / 180; // variable assign for rotation    
+                List<ObjectId> listOfObjId = new List<ObjectId>();
+                var externalCornerId = partHelper.drawExternalCorner(xDataRegAppName, basepoint.X, basepoint.Y, CommonModule.extrnlCornr_Flange, CommonModule.externalCornerThick, CommonModule.externalCornerLyrName, CommonModule.externalCornerLyrColor);
+                AEE_Utility.AttachXData(externalCornerId, xDataRegAppName, CommonModule.xDataAsciiName);
+                AEE_Utility.AttachXData(externalCornerId, xDataRegAppName + "_1", CommonModule.extrnlCornr_Flange.ToString() + "," +
+                                                                                  CommonModule.externalCornerThick.ToString());
+
+                listOfObjId.Add(externalCornerId);
+                MoveRorationScaleJig.RotationScaleJig_Method(listOfObjId);
+
+                listOfExternalWallCorner_Points_EvenNo.Add(basepoint);
+                listOfExternalWallCorner_ObjId_EvenNo.Add(externalCornerId);
+
+                listOfExternalWallCorner_Points_OddNo.Add(basepoint);
+                listOfExternalWallCorner_ObjId_OddNo.Add(externalCornerId);
+
+                listOfAllExternalWallCorner_Points.Add(CommonModule.basePoint);
+                listOfAllExternalWallCorner_ObjId.Add(externalCornerId);
+                double beamBottom = 0;
+                double EC_CornerHght = GeometryHelper.getHeightOfWall_EC_IC_ExternallWall(wallLayerName, InternalWallSlab_UI_Helper.getSlabBottom(wallLayerName), beamBottom, PanelLayout_UI.getSlabThickness(wallLayerName), PanelLayout_UI.RC, PanelLayout_UI.kicker, CommonModule.internalCorner, sunkanSlabId);
+
+                var lstTemp = new List<List<object>>();
+                List<string> cornerTexts = CornerHelper.UpdateCornerTextExternal(lstTemp, EC_CornerHght);
+
+                //var cornerText = CornerHelper.getCornerText(CommonModule.externalCornerText, CommonModule.extrnlCornr_Flange, CommonModule.extrnlCornr_Flange, EC_CornerHght);
+                double crnerRotationAngle = rotationAngle + CommonModule.cornerRotationAngle;
+                List<ObjectId> textIds = cornerHlpr.writeMultipleTextInCorner(externalCornerId, cornerTexts, crnerRotationAngle, CommonModule.externalCornerTextLyrName, CommonModule.externalCornerLyrColor);
+                listOfExternalWallCornerText_ObjId_EvenNo.Add(textIds);
+                listOfExternalWallCornerText_ObjId_OddNo.Add(textIds);
+                listOfAllExternalWallCornerText_ObjId.Add(textIds);
+
+                cornerHlpr.setExternalCornerInConcave(externalCornerId, textIds);
+
+                //Fix elevation when wall Ht more than 3000 by SDM 2022-08-06
+                //for (int i = 0; i < lstTemp.Count; i++)
+                //{
+                //    CornerHelper.setCornerDataForBOM(xDataRegAppName, externalCornerId, textIds[i], cornerTexts[i], CommonModule.externalCornerDescp, CommonModule.externalCornerText, CommonModule.extrnlCornr_Flange, CommonModule.extrnlCornr_Flange, Convert.ToDouble(lstTemp[i][4]), elev);
+                //}
+                double _elev = 0;
+                for (int i = 0; i < lstTemp.Count; i++)
+                {
+                    CornerElevation elevation = new CornerElevation(elev.wall1, elev.wall2, elev.dist1, elev.dist2, _elev);
+
+                    CornerHelper.setCornerDataForBOM(xDataRegAppName, externalCornerId, textIds[i], cornerTexts[i], CommonModule.externalCornerDescp, CommonModule.externalCornerText, CommonModule.extrnlCornr_Flange, CommonModule.extrnlCornr_Flange, Convert.ToDouble(lstTemp[i][4]), elevation);
+
+                    _elev += Convert.ToDouble(lstTemp[i][4]);
+                }
+            }
+
+            return flagOfExternalDwg;
+        }
+
+
+        public ObjectId drawOffsetExternalWall(ObjectId externalWall_ObjId)
+        {
+            // get outside offset externall wall.
+            ObjectId offsetExternalWall_ObjId = new ObjectId();
+
+            List<Point2d> listOfExternallWall_Vertex = AEE_Utility.GetPolylineVertexPoint(externalWall_ObjId);
+
+            double extrnalWallMinX = listOfExternallWall_Vertex.Min(point => point.X);
+            double extrnalWallMinY = listOfExternallWall_Vertex.Min(point => point.Y);
+            double extrnalWallMaxX = listOfExternallWall_Vertex.Max(point => point.X);
+            double extrnalWallMaxY = listOfExternallWall_Vertex.Max(point => point.Y);
+            var actualWallLength = AEE_Utility.GetLengthOfLine(extrnalWallMinX, extrnalWallMinY, 0, extrnalWallMaxX, extrnalWallMaxY, 0);
+
+            //double offsetValue = (CommonModule.internalCornerThick / 2);
+            double offsetValue = 1;
+
+            var positiveOffsetExtrnlWall_Id = AEE_Utility.OffsetEntity(offsetValue, externalWall_ObjId, false);
+            if (positiveOffsetExtrnlWall_Id.IsValid == false)
+            {
+                offsetExternalWall_ObjId = new ObjectId();
+                return offsetExternalWall_ObjId;
+            }
+
+            List<Point2d> listOfPstvOffstExternallWall_Vertex = AEE_Utility.GetPolylineVertexPoint(positiveOffsetExtrnlWall_Id);
+            double pstvOffstWallMinX = listOfPstvOffstExternallWall_Vertex.Min(point => point.X);
+            double pstvOffstWallMinY = listOfPstvOffstExternallWall_Vertex.Min(point => point.Y);
+            double pstvOffstWallMaxX = listOfPstvOffstExternallWall_Vertex.Max(point => point.X);
+            double pstvOffstWallMaxY = listOfPstvOffstExternallWall_Vertex.Max(point => point.Y);
+            var pstvOffstWallLength = AEE_Utility.GetLengthOfLine(pstvOffstWallMinX, pstvOffstWallMinY, 0, pstvOffstWallMaxX, pstvOffstWallMaxY, 0);
+
+            var negativeOffsetIntrnlWall_Id = AEE_Utility.OffsetEntity(-offsetValue, externalWall_ObjId, false);
+            if (negativeOffsetIntrnlWall_Id.IsValid == false)
+            {
+                offsetExternalWall_ObjId = new ObjectId();
+                AEE_Utility.deleteEntity(positiveOffsetExtrnlWall_Id);
+                return offsetExternalWall_ObjId;
+            }
+
+            List<Point2d> listOfNgtvOffstExternallWall_Vertex = AEE_Utility.GetPolylineVertexPoint(negativeOffsetIntrnlWall_Id);
+            double ngtvOffstWallMinX = listOfNgtvOffstExternallWall_Vertex.Min(point => point.X);
+            double ngtvOffstWallMinY = listOfNgtvOffstExternallWall_Vertex.Min(point => point.Y);
+            double ngtvOffstWallMaxX = listOfNgtvOffstExternallWall_Vertex.Max(point => point.X);
+            double ngtvOffstWallMaxY = listOfNgtvOffstExternallWall_Vertex.Max(point => point.Y);
+            var ngtvOffstWallLength = AEE_Utility.GetLengthOfLine(ngtvOffstWallMinX, ngtvOffstWallMinY, 0, ngtvOffstWallMaxX, ngtvOffstWallMaxY, 0);
+
+            if (actualWallLength < pstvOffstWallLength)
+            {
+                offsetExternalWall_ObjId = positiveOffsetExtrnlWall_Id;
+                AEE_Utility.deleteEntity(negativeOffsetIntrnlWall_Id);
+            }
+            else
+            {
+                offsetExternalWall_ObjId = negativeOffsetIntrnlWall_Id;
+                AEE_Utility.deleteEntity(positiveOffsetExtrnlWall_Id);
+            }
+
+            AEE_Utility.changeColor(offsetExternalWall_ObjId, 4);
+
+            return offsetExternalWall_ObjId;
+        }
+
+        private ObjectId getXDataRegisteredAppName_ExternalWall(int index, List<ObjectId> listOfExternalWallLineId)
+        {
+            ObjectId wallLineId_With_RoomName = new ObjectId();
+
+            if (index != 0)
+            {
+                wallLineId_With_RoomName = listOfExternalWallLineId[index - 1];
+            }
+            else
+            {
+                wallLineId_With_RoomName = listOfExternalWallLineId[listOfExternalWallLineId.Count - 1];
+            }
+
+            return wallLineId_With_RoomName;
+        }
+
+    }
+}

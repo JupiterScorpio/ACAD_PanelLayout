@@ -1,0 +1,1359 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ModPlus_2017</name>
+    </assembly>
+    <members>
+        <member name="T:ModPlus.App.MiniPluginsSettingsViewModel">
+            <summary>
+            Модель представления для окна настроек, отвечающая за мини-плагины
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.MiniPluginsSettingsViewModel.EntByBlock">
+            <summary>
+            Задать вхождения по блоку
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.MiniPluginsSettingsViewModel.NestedEntLayer">
+            <summary>
+            Задать слой вхождений
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.MiniPluginsSettingsViewModel.FastBlocks">
+            <summary>
+            Часто используемые блоки
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.MiniPluginsSettingsViewModel.VPtoMS">
+            <summary>
+            Границы видового экрана в пространство модели
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.MiniPluginsSettingsViewModel.WipeoutEdit">
+            <summary>
+            Редактировать вершины полилиний
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.MiniPluginsSettingsViewModel.FastBlocksSettingsCommand">
+            <summary>
+            Команда запуска окна настроек мини-плагина "Часто используемые блоки"
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.MiniPluginsSettingsViewModel.OpenHelpCommand">
+            <summary>
+            Открыть справку
+            </summary>
+        </member>
+        <member name="T:ModPlus.App.ModuleCommands">
+            <summary>
+            Команды модуля
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.ModuleCommands.OpenSettings">
+            <summary>
+            Запуск окна настроек
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.ModuleCommands.ShowUserInfo">
+            <summary>
+            Запустить окно "Личный кабинет"
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.ModuleCommands.ShowFeedback">
+            <summary>
+            Запустить окно "Обратная связь"
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.ModuleCommands.YouBanned">
+            <summary>
+            Ban message
+            </summary>
+        </member>
+        <member name="T:ModPlus.App.ProductIconCommands">
+            <summary>
+            Команды включения/отключения иконки продуктов
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.ProductIconCommands.ShowIcon">
+            <summary>
+            Включить идентификационные иконки для примитивов, имеющих расширенные данные продуктов ModPlus
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.ProductIconCommands.HideIcon">
+            <summary>
+            Отключить идентификационные иконки для примитивов, имеющих расширенные данные продуктов ModPlus
+            </summary>
+        </member>
+        <member name="T:ModPlus.App.ProductsDrawableOverrule">
+            <inheritdoc />
+        </member>
+        <member name="M:ModPlus.App.ProductsDrawableOverrule.Instance">
+            <summary>
+            Get singleton instance
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.ProductsDrawableOverrule.WorldDraw(Autodesk.AutoCAD.GraphicsInterface.Drawable,Autodesk.AutoCAD.GraphicsInterface.WorldDraw)">
+            <inheritdoc />
+        </member>
+        <member name="T:ModPlus.App.RibbonBuilder">
+            <summary>
+            Ribbon tab builder
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.RibbonBuilder.BuildRibbon(System.Boolean)">
+            <summary>
+            Build ribbon tab
+            </summary>
+            <param name="setActive">Activate tab</param>
+        </member>
+        <member name="T:ModPlus.App.SettingsViewModel">
+            <summary>
+            Модель представления окна настроек
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.SettingsViewModel.#ctor(ModPlus.App.SettingsWindow)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ModPlus.App.SettingsViewModel"/> class.
+            </summary>
+            <param name="parentWindow">Parent window</param>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.MiniPluginsViewModel">
+            <summary>
+            Модель представления для окна настроек, отвечающая за мини-плагины
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.Languages">
+            <summary>
+            Список доступных языков
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.SelectedLanguage">
+            <summary>
+            Выбранный язык
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.LanguageImage">
+            <summary>
+            Изображение для языка (флаг)
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.MessageAboutLanguageVisibility">
+            <summary>
+            Видимость сообщения о невозможности изменить какие-то настройки при переключении языка без перезагрузки
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.Themes">
+            <summary>
+            Доступные темы
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.SelectedTheme">
+            <summary>
+            Выбранная тема оформления
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.Separators">
+            <summary>
+            Разделители для чисел
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.SelectedSeparator">
+            <summary>
+            Выбранный разделитель целой и дробной части чисел
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.QuietLoading">
+            <summary>
+            Тихая загрузка
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.NotificationSettingsCommand">
+            <summary>
+            Запускает окно настроек уведомлений
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.Ribbon">
+            <summary>
+            Лента
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.Palette">
+            <summary>
+            Палитра
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.PaletteDependsVisibility">
+            <summary>
+            Видимость опций, зависимых от опции <see cref="P:ModPlus.App.SettingsViewModel.Palette"/>
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.FunctionsInPalette">
+            <summary>
+            Вкладка "Плагины" в палитре
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.DrawingsInPalette">
+            <summary>
+            Вкладка "Чертежи" в палитре
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.FloatMenu">
+            <summary>
+            Плавающее меню
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.FloatMenuDependsVisibility">
+            <summary>
+            Видимость опций, зависимых от опции <see cref="P:ModPlus.App.SettingsViewModel.FloatMenu"/>
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.FloatMenuCollapseTo">
+            <summary>
+            В какое состояние сворачивать плавающее меню
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.DrawingsInFloatMenu">
+            <summary>
+            Вкладка "Чертежи" в плавающем меню
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.DrawingsFloatMenu">
+            <summary>
+            Плавающее меню чертежи
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.DrawingsFloatMenuDependsVisibility">
+            <summary>
+            Видимость опций, зависимых от опции <see cref="P:ModPlus.App.SettingsViewModel.DrawingsFloatMenu"/>
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.DrawingsFloatMenuCollapseTo">
+            <summary>
+            В какое состояние сворачивать плавающее меню "Чертежи"
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.IsLocalLicenseServerEnable">
+            <summary>
+            Включена работа с ЛВС Сервером Лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.LocalLicenseServerIpAddress">
+            <summary>
+            Ip адрес локального сервера лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.LocalLicenseServerPort">
+            <summary>
+            Порт локального сервера лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.CanStopLocalLicenseServerConnection">
+            <summary>
+            Можно ли выполнить остановку локального сервера лицензий. True - значит локальный сервер лицензий работает
+            на момент открытия окна
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.CheckLocalLicenseServerConnectionCommand">
+            <summary>
+            Проверка соединения с локальным сервером лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.StopLocalLicenseServerCommand">
+            <summary>
+            Прервать работу локального сервера лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.RestoreLocalLicenseServerCommand">
+            <summary>
+            Восстановить работу локального сервера лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.IsWebLicenseServerEnable">
+            <summary>
+            Включена работа с веб сервером лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.WebLicenseServerGuid">
+            <summary>
+            Уникальный идентификатор сервера лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.WebLicenseServerUserEmail">
+            <summary>
+            Адрес электронной почты пользователя, используемый для его идентификации в веб сервере лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.CanStopWebLicenseServerNotification">
+            <summary>
+            Можно ли остановить отправку уведомлений веб серверу лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.CheckWebLicenseServerConnectionCommand">
+            <summary>
+            Проверка доступности веб сервера лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.CheckIsUserAllowForWebLicenseServerCommand">
+            <summary>
+            Проверка текущего пользователя на доступность работы с сервером лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.StopWebLicenseServerNotificationsCommand">
+            <summary>
+            Остановить отправку уведомлений веб серверу лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.RestoreWebLicenseServerNotificationsCommand">
+            <summary>
+            Восстановить отправку уведомлений веб серверу лицензий
+            </summary>
+        </member>
+        <member name="P:ModPlus.App.SettingsViewModel.DisableConnectionWithLicenseServerInAutoCAD">
+            <summary>
+            Отключить работу сервера лицензий в AutoCAD
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.SettingsViewModel.FillData">
+            <summary>
+            Заполнение данных
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.SettingsViewModel.ApplySettings">
+            <summary>
+            Применить настройки
+            </summary>
+        </member>
+        <member name="T:ModPlus.App.SettingsWindow">
+            <summary>
+            Окно настроек ModPlus
+            </summary>
+            <summary>
+            SettingsWindow
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.SettingsWindow.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:ModPlus.App.SettingsWindow"/> class.
+            </summary>
+        </member>
+        <member name="M:ModPlus.App.SettingsWindow.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:ModPlus.Extensions.CoordinateSystems.CoordinateSystemType">
+            <summary>
+            AutoCAD coordinate systems enumeration.
+            </summary>
+        </member>
+        <member name="F:ModPlus.Extensions.CoordinateSystems.CoordinateSystemType.WCS">
+            <summary>
+            World Coordinate System.
+            </summary>
+        </member>
+        <member name="F:ModPlus.Extensions.CoordinateSystems.CoordinateSystemType.UCS">
+            <summary>
+            Current User Coordinate System.
+            </summary>
+        </member>
+        <member name="F:ModPlus.Extensions.CoordinateSystems.CoordinateSystemType.DCS">
+            <summary>
+            Display Coordinate System of the current viewport.
+            </summary>
+        </member>
+        <member name="F:ModPlus.Extensions.CoordinateSystems.CoordinateSystemType.PSDCS">
+            <summary>
+            Paper Space Display Coordinate System.
+            </summary>
+        </member>
+        <member name="T:ModPlus.Extensions.CoordinateSystems.EditorCoordinateSystemExtensions">
+            <summary>
+            Расширения для редактора для работы с системами координат
+            </summary>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.EditorCoordinateSystemExtensions.TransformPoint(Autodesk.AutoCAD.EditorInput.Editor,Autodesk.AutoCAD.Geometry.Point3d,ModPlus.Extensions.CoordinateSystems.CoordinateSystemType,ModPlus.Extensions.CoordinateSystems.CoordinateSystemType)">
+            <summary>
+            Transforms a point from a coordinate system to another one in the specified editor.
+            </summary>
+            /// <param name="ed">An instance of the Editor to which the method applies.</param>
+            <param name="pt">The instance to which the method applies.</param>
+            <param name="from">The origin coordinate system.</param>
+            <param name="to">The target coordinate system.</param>
+            <returns>The corresponding 3d point.</returns>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">
+            eInvalidInput is thrown if CoordSystem.PSDCS is used with other than CoordSystem.DCS.</exception>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.EditorCoordinateSystemExtensions.GetTransformMatrixFromDCSToPSDCS(Autodesk.AutoCAD.EditorInput.Editor)">
+            <summary>
+            Gets the transformation matrix from the paper space active viewport Display Coordinate System (DCS)
+            to the Paper space Display Coordinate System (PSDCS).
+            </summary>
+            <param name="ed">The instance to which this method applies.</param>
+            <returns>The DCS to PSDCS transformation matrix.</returns>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">
+            eNotInPaperSpace is thrown if this method is called form Model Space.</exception>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">
+            eCannotChangeActiveViewport is thrown if there is none floating viewport in the current layout.</exception>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.EditorCoordinateSystemExtensions.GetTransformMatrixFromDCSToWCS(Autodesk.AutoCAD.EditorInput.Editor)">
+            <summary>
+            Gets the transformation matrix from the current viewport Display Coordinate System (DCS)
+            to the World Coordinate System (WCS).
+            </summary>
+            <param name="ed">The instance to which this method applies.</param>
+            <returns>The DCS to WCS transformation matrix.</returns>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.EditorCoordinateSystemExtensions.GetTransformMatrixFromPSDCSToDCS(Autodesk.AutoCAD.EditorInput.Editor)">
+            <summary>
+            Gets the transformation matrix from the Paper space Display Coordinate System (PSDCS)
+            to the paper space active viewport Display Coordinate System (DCS).
+            </summary>
+            <param name="ed">The instance to which this method applies.</param>
+            <returns>The PSDCS to DCS transformation matrix.</returns>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">
+            eNotInPaperSpace is thrown if this method is called form Model Space.</exception>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">
+            eCannotChangeActiveViewport is thrown if there is none floating viewport in the current layout.</exception>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.EditorCoordinateSystemExtensions.GetTransformMatrixFromUCSToWCS(Autodesk.AutoCAD.EditorInput.Editor)">
+            <summary>
+            Gets the transformation matrix from the current User Coordinate System (UCS)
+            to the World Coordinate System (WCS).
+            </summary>
+            <param name="ed">The instance to which this method applies.</param>
+            <returns>The UCS to WCS transformation matrix.</returns>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.EditorCoordinateSystemExtensions.GetTransformMatrixFromWCSToDCS(Autodesk.AutoCAD.EditorInput.Editor)">
+            <summary>
+            Gets the transformation matrix from the World Coordinate System (WCS)
+            to the current viewport Display Coordinate System (DCS).
+            </summary>
+            <param name="ed">The instance to which this method applies.</param>
+            <returns>The WCS to DCS transformation matrix.</returns>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.EditorCoordinateSystemExtensions.GetTransformMatrixFromWCSToUCS(Autodesk.AutoCAD.EditorInput.Editor)">
+            <summary>
+            Gets the transformation matrix from the World Coordinate System (WCS)
+            to the current User Coordinate System (UCS).
+            </summary>
+            <param name="ed">The instance to which this method applies.</param>
+            <returns>The WCS to UCS transformation matrix.</returns>
+        </member>
+        <member name="T:ModPlus.Extensions.CoordinateSystems.ViewportCoordinateSystemExtensions">
+            <summary>
+            Расширения для видовых экранов для работы с системами координат
+            </summary>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.ViewportCoordinateSystemExtensions.GetTransformMatrixFromDCSToPSDCS(Autodesk.AutoCAD.DatabaseServices.Viewport)">
+            <summary>
+            Gets the transformation matrix from the specified paper space viewport Display Coordinate System (DCS)
+            to the paper space Display Coordinate System (PSDCS).
+            </summary>
+            <param name="vp">The instance to which this method applies.</param>
+            <returns>The DCS to PSDCS transformation matrix.</returns>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.ViewportCoordinateSystemExtensions.GetTransformMatrixFromDCSToWCS(Autodesk.AutoCAD.DatabaseServices.Viewport)">
+            <summary>
+            Gets the transformation matrix from the specified model space viewport Display Coordinate System (DCS)
+            to the World Coordinate System (WCS).
+            </summary>
+            <param name="vp">The instance to which this method applies.</param>
+            <returns>The DCS to WCS transformation matrix.</returns>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.ViewportCoordinateSystemExtensions.GetTransformMatrixFromPSDCSToDCS(Autodesk.AutoCAD.DatabaseServices.Viewport)">
+            <summary>
+            Gets the transformation matrix from the Paper Space Display Coordinate System (PSDCS)
+            to the specified paper space viewport Display Coordinate System (DCS).
+            </summary>
+            <param name="vp">The instance to which this method applies.</param>
+            <returns>The PSDCS to DCS transformation matrix.</returns>
+        </member>
+        <member name="M:ModPlus.Extensions.CoordinateSystems.ViewportCoordinateSystemExtensions.GetTransformMatrixFromWCSToDCS(Autodesk.AutoCAD.DatabaseServices.Viewport)">
+            <summary>
+            Gets the transformation matrix from the World Coordinate System (WCS)
+            to the specified model space viewport Display Coordinate System (DCS).
+            </summary>
+            <param name="vp">The instance to which this method applies.</param>
+            <returns>The WCS to DCS transformation matrix.</returns>
+        </member>
+        <member name="T:ModPlus.Extensions.DatabaseExtensions">
+            <summary>
+            Расширения для базы данных
+            </summary>
+        </member>
+        <member name="M:ModPlus.Extensions.DatabaseExtensions.MsId(Autodesk.AutoCAD.DatabaseServices.Database)">
+            <summary>
+            Возвращает идентификатор пространства модели
+            </summary>
+            <param name="db">База данных</param>
+        </member>
+        <member name="M:ModPlus.Extensions.DatabaseExtensions.Ms(Autodesk.AutoCAD.DatabaseServices.Database,System.Boolean)">
+            <summary>
+            Возвращает таблицу записей пространства модели
+            </summary>
+            <param name="db">База данных</param>
+            <param name="write">Открыть для записи</param>
+        </member>
+        <member name="M:ModPlus.Extensions.DatabaseExtensions.GetTextStyleId(Autodesk.AutoCAD.DatabaseServices.Database,System.String)">
+            <summary>
+            Возвращает идентификатор текстового стиля по названию.
+            Если стиля с таким названием в чертеже нет, возвращается идентификатор текущего стиля.
+            </summary>
+            <param name="db">База данных</param>
+            <param name="textStyleName">Название текстового стиля</param>
+        </member>
+        <member name="T:ModPlus.Extensions.ObjectIdExtensions">
+            <summary>
+            Расширения для идентификаторов объектов
+            </summary>
+        </member>
+        <member name="M:ModPlus.Extensions.ObjectIdExtensions.IsFullyValid(Autodesk.AutoCAD.DatabaseServices.ObjectId)">
+            <summary>
+            Возвращает истину, если идентификатор объекта полностью валидный: объект есть в базе и он не удалён
+            </summary>
+            <param name="id">Идентификатор</param>
+        </member>
+        <member name="M:ModPlus.Extensions.ObjectIdExtensions.Is``1(Autodesk.AutoCAD.DatabaseServices.ObjectId)">
+            <summary>
+            Возвращает истину, если объект соответствует заданному типу
+            </summary>
+            <typeparam name="T">Тип, на который проверяем</typeparam>
+            <param name="id">Идентификатор объекта объекта</param>
+        </member>
+        <member name="M:ModPlus.Extensions.ObjectIdExtensions.OpenAs``1(Autodesk.AutoCAD.DatabaseServices.ObjectId,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Возвращает объект, открытый без использования транзакции и приведённый к заданному типу
+            </summary>
+            <param name="id">Идентификатор объекта</param>
+            <param name="forWrite">Открыть для записи</param>
+            <param name="openErased">Открыть, даже если объект удалён</param>
+            <param name="forceOpenOnLockedLayer">Открыть, даже если объект находится на замороженном слое</param>
+            <typeparam name="T">Тип объекта</typeparam>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">Если объект не соответствует заданному типу</exception>
+        </member>
+        <member name="M:ModPlus.Extensions.ObjectIdExtensions.TryOpenAs``1(Autodesk.AutoCAD.DatabaseServices.ObjectId,System.Boolean,System.Boolean)">
+            <summary>
+            Returns an object opened without using a transaction and cast to the given type
+            </summary>
+            <param name="id">Identifier</param>
+            <param name="forWrite">Open for writing</param>
+            <param name="forceOpenOnLockedLayer">Open even if the object is on a frozen layer</param>
+            <typeparam name="T">Object type</typeparam>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">If the object does not match the specified type</exception>
+        </member>
+        <member name="M:ModPlus.Extensions.ObjectIdExtensions.GetObjectAs``1(Autodesk.AutoCAD.DatabaseServices.ObjectId,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Возвращает объект, открытый с использованием транзакции и приведённый к заданному типу.
+            Для работы метода необходимо, чтобы была запущена транзакция!
+            </summary>
+            <param name="id">Идентификатор объекта</param>
+            <param name="forWrite">Открыть для записи</param>
+            <param name="openErased">Открыть, даже если объект удалён</param>
+            <param name="forceOpenOnLockedLayer">Открыть, даже если объект находится на замороженном слое</param>
+            <typeparam name="T">Тип объекта</typeparam>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">Если объект не соответствует заданному типу</exception>
+        </member>
+        <member name="M:ModPlus.Extensions.ObjectIdExtensions.TryGetObjectAs``1(Autodesk.AutoCAD.DatabaseServices.ObjectId,System.Boolean,System.Boolean)">
+            <summary>
+            Открытие объекта через транзакцию, когда точно не известен тип объекта.
+            </summary>
+            <param name="id">Id</param>
+            <param name="forWrite">Открыть для записи</param>
+            <param name="forceOpenOnLockedLayer">Открыть, даже если объект находится на замороженном слое</param>
+            <typeparam name="T">Тип объекта</typeparam>
+        </member>
+        <member name="M:ModPlus.Extensions.ObjectIdExtensions.GetObjects``1(System.Collections.IEnumerable,System.Boolean,System.Boolean)">
+            <summary>
+            Открытие объектов
+            </summary>
+            <param name="ids">Id объектов</param>
+            <param name="forWrite">Открыть для записи</param>
+            <param name="onLockedLayer">На заблокированном слое</param>
+            <typeparam name="T">Тип</typeparam>
+        </member>
+        <member name="T:ModPlus.Extensions.Point2dExtensions">
+            <summary>
+            Расширения для 2D точек
+            </summary>
+        </member>
+        <member name="M:ModPlus.Extensions.Point2dExtensions.OffsetPoint(Autodesk.AutoCAD.Geometry.Point2d,System.Double,System.Double)">
+            <summary>
+            Возвращает точку, смещённую относительно исходной
+            </summary>
+            <param name="basePoint">Исходная точка</param>
+            <param name="x">Смещение по X</param>
+            <param name="y">Смещение по Y</param>
+        </member>
+        <member name="M:ModPlus.Extensions.Point2dExtensions.ConvertTo3d(Autodesk.AutoCAD.Geometry.Point2d)">
+            <summary>
+            Возвращает 3D точку с координатами X и Y исходной 2D точки и нулевой координатой Z
+            </summary>
+            <param name="point">Исходная 2D точка</param>
+        </member>
+        <member name="M:ModPlus.Extensions.Point2dExtensions.GetMiddlePoint(Autodesk.AutoCAD.Geometry.Point2d,Autodesk.AutoCAD.Geometry.Point2d)">
+            <summary>
+            Возвращает точку посередине между точкой и другой точкой
+            </summary>
+            <param name="point">Точка</param>
+            <param name="otherPoint">Другая точка</param>
+        </member>
+        <member name="T:ModPlus.Extensions.Point3dExtensions">
+            <summary>
+            Расширения для 3D точек
+            </summary>
+        </member>
+        <member name="M:ModPlus.Extensions.Point3dExtensions.OffsetPoint(Autodesk.AutoCAD.Geometry.Point3d,System.Double,System.Double,System.Double)">
+            <summary>
+            Возвращает точку, смещённую относительно исходной
+            </summary>
+            <param name="basePoint">Исходная точка</param>
+            <param name="x">Смещение по X</param>
+            <param name="y">Смещение по Y</param>
+            <param name="z">Смещение по Z</param>
+        </member>
+        <member name="M:ModPlus.Extensions.Point3dExtensions.ConvertTo2d(Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary>
+            Возвращает 2D точку с координатами X и Y исходной 3D точки
+            </summary>
+            <param name="point">Исходная 3D точка</param>
+        </member>
+        <member name="M:ModPlus.Extensions.Point3dExtensions.Flatten(Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary>
+            Возвращает 3D точку с координатами X и Y исходной 3D точки и нулевой координатой Z
+            </summary>
+            <param name="pt">Исходная 3D точка</param>
+            <returns></returns>
+        </member>
+        <member name="M:ModPlus.Extensions.Point3dExtensions.GetMiddlePoint(Autodesk.AutoCAD.Geometry.Point3d,Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary>
+            Возвращает точку посередине между точкой и другой точкой
+            </summary>
+            <param name="point">Точка</param>
+            <param name="otherPoint">Другая точка</param>
+        </member>
+        <member name="M:ModPlus.Extensions.Point3dExtensions.TransformFromUcsToWcs(Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary>
+            Возвращает точку, полученную трансформацией исходной точки из пользовательской системы координат в мировую
+            </summary>
+            <param name="pt">Исходная точка</param>
+        </member>
+        <member name="M:ModPlus.Extensions.Point3dExtensions.TransformFromWcsToUcs(Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary>
+            Возвращает точку, полученную трансформацией исходной точки из мировой системы координат в пользовательскую
+            </summary>
+            <param name="pt">Исходная точка</param>
+        </member>
+        <member name="M:ModPlus.Extensions.Point3dExtensions.Transform(Autodesk.AutoCAD.Geometry.Point3d,ModPlus.Extensions.CoordinateSystems.CoordinateSystemType,ModPlus.Extensions.CoordinateSystems.CoordinateSystemType)">
+            <summary>
+            Возвращает точку, полученную трансформацией исходной точки из одной системы координат в другую
+            </summary>
+            <param name="pt">Исходная точка</param>
+            <param name="from">Исходная система координат</param>
+            <param name="to">Целевая система координат</param>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">
+            eInvalidInput - если трансформировать из PSDCS в любую систему координат, отличную от DCS
+            </exception>
+        </member>
+        <member name="T:ModPlus.Extensions.TransactionExtensions">
+            <summary>
+            Расширения для транзакций
+            </summary>
+        </member>
+        <member name="M:ModPlus.Extensions.TransactionExtensions.GetObjectAs``1(Autodesk.AutoCAD.DatabaseServices.Transaction,Autodesk.AutoCAD.DatabaseServices.ObjectId,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Возвращает объект, открытый с использованием транзакции и приведённый к заданному типу
+            </summary>
+            <param name="transaction">Транзакция</param>
+            <param name="id">Идентификатор объекта</param>
+            <param name="forWrite">Открыть для записи</param>
+            <param name="openErased">Открыть, даже если объект удалён</param>
+            <param name="forceOpenOnLockedLayer">Открыть, даже если объект находится на замороженном слое</param>
+            <typeparam name="T">Тип объекта</typeparam>
+            <exception cref="T:Autodesk.AutoCAD.Runtime.Exception">Если объект не соответствует заданному типу</exception>
+        </member>
+        <member name="T:ModPlus.Helpers.AutocadHelpers">
+            <summary>
+            Различные вспомогательные методы для работы в AutoCAD
+            </summary>
+        </member>
+        <member name="T:ModPlus.Helpers.AutocadHelpers.StandardArrowhead">
+            <summary>Стандартные стрелки AutoCAD</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead.closedFilled">
+            <summary>Заполненная замкнутая</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._DOT">
+            <summary>Точка</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._DOTSMALL">
+            <summary>Малая точка</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._DOTBLANK">
+            <summary>Контурная точка</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._ORIGIN">
+            <summary>Указатель исходной точки</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._ORIGIN2">
+            <summary>Указатель исходной точки 2</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._OPEN">
+            <summary>Разомкнутая</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._OPEN90">
+            <summary>Прямой угол</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._OPEN30">
+            <summary>Разомкнутая 30</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._CLOSED">
+            <summary>Замкнутая</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._SMALL">
+            <summary>Контурная малая точка</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._NONE">
+            <summary>Ничего</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._OBLIQUE">
+            <summary>Засечка</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._BOXFILLED">
+            <summary>Заполненный прямоугольник</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._BOXBLANK">
+            <summary>Прямоугольник</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._CLOSEDBLANK">
+            <summary>Контурная замкнутая</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._DATUMBLANK">
+            <summary>Треугольник базы отсчета</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._INTEGRAL">
+            <summary>Интеграл</summary>
+        </member>
+        <member name="F:ModPlus.Helpers.AutocadHelpers.StandardArrowhead._ARCHTICK">
+            <summary>Двойная засечка</summary>
+        </member>
+        <member name="M:ModPlus.Helpers.AutocadHelpers.GetArrowObjectId(System.String)">
+            <summary>ObjectId блока для стрелки</summary>
+            <param name="newArrName">Имя блока для стрелки</param>
+            <returns>ObjectId нового блока стрелки</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.AutocadHelpers.GetArrowObjectId(ModPlus.Helpers.AutocadHelpers.StandardArrowhead)">
+            <summary>ObjectId одного из стандартного блока для стрелки</summary>
+            <returns>ObjectId стандартного блока стрелки</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.AutocadHelpers.UcsToWcs(Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary>
+            Перевод точки из пользовательской системы координат в мировую
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.AutocadHelpers.ZoomToEntities(Autodesk.AutoCAD.DatabaseServices.ObjectId[])">
+            <summary>Зуммировать объекты</summary>
+            <param name="objIds">Однострочный массив ObjectId зуммируемых объектов</param>
+        </member>
+        <member name="M:ModPlus.Helpers.AutocadHelpers.EffectiveBlockName(Autodesk.AutoCAD.DatabaseServices.Transaction,Autodesk.AutoCAD.DatabaseServices.BlockReference)">
+            <summary>Получение "реального" имени блока</summary>
+            <param name="tr">Транзакция</param>
+            <param name="bref">Вхождение блока</param>
+            <returns></returns>
+        </member>
+        <member name="M:ModPlus.Helpers.AutocadHelpers.GetAnnotationScaleByName(System.String)">
+            <summary>Получение аннотативного масштаба по имени из текущей базы данных (HostApplicationServices.WorkingDatabase)</summary>
+            <param name="name">Имя масштаба</param>
+            <returns>Аннотативный масштаб с таким именем или текущий масштаб в БД</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.AutocadHelpers.IsEditorIsQuiescent(Autodesk.AutoCAD.EditorInput.Editor)">
+            <summary>
+            Проверка, что редактор доступен для приема команд. Если не доступен, то будет показано сообщение
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.AutocadHelpers.GetLineWeights(System.Boolean)">
+            <summary>
+            Возвращает список оберток для весов линий с учетом локализации
+            </summary>
+            <param name="includeByDefault">Включить "По умолчанию"</param>
+        </member>
+        <member name="T:ModPlus.Helpers.GeometryHelpers">
+            <summary>
+            Вспомогательные методы построения геометрии
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.GeometryHelpers.Point3dAtDirection(Autodesk.AutoCAD.Geometry.Point3d,Autodesk.AutoCAD.Geometry.Point3d,Autodesk.AutoCAD.Geometry.Point3d,System.Double)">
+            <summary>3Д точка по направлению. Направление берется как единичный вектор из точки pt2 к точке pt1, перемножается на указанную
+            длину и откладывается от указанной точки</summary>
+            <param name="pt1">Первая точка для получения единичного вектора</param>
+            <param name="pt2">Вторая точка для получения единичного вектора</param>
+            <param name="ptFrom">Точка от которой откладывается расстояние</param>
+            <param name="length">Расстояние на котором нужно получить точку</param>
+            <returns>3Д точка</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.GeometryHelpers.Point2dAtDirection(Autodesk.AutoCAD.Geometry.Point3d,Autodesk.AutoCAD.Geometry.Point3d,Autodesk.AutoCAD.Geometry.Point3d,System.Double)">
+            <summary>2Д точка по направлению. Направление берется как единичный вектор из точки pt2 к точке pt1, перемножается на указанную
+            длину и откладывается от указанной точки</summary>
+            <param name="pt1">Первая точка для получения единичного вектора</param>
+            <param name="pt2">Вторая точка для получения единичного вектора</param>
+            <param name="ptFrom">Точка от которой откладывается расстояние</param>
+            <param name="length">Расстояние на котором нужно получить точку</param>
+            <returns>2Д точка</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.GeometryHelpers.GetPointToExtendLine(Autodesk.AutoCAD.Geometry.Point3d,Autodesk.AutoCAD.Geometry.Point3d,System.Double)">
+            <summary>Получение 2d точки на продолжении условного отрезка</summary>
+            <param name="p1">Первая точка условного отрезка</param>
+            <param name="p2">Вторая точка условного отрезка</param>
+            <param name="distance">Расстояние</param>
+        </member>
+        <member name="M:ModPlus.Helpers.GeometryHelpers.GetPerpendicularPoint2d(Autodesk.AutoCAD.Geometry.Point3d,Autodesk.AutoCAD.Geometry.Point3d,System.Double)">
+            <summary>Получение 2d точки на указанном расстоянии от условного отрезка, получаемого точками p1 и p2</summary>
+            <param name="p1">Первая точка условного отрезка</param>
+            <param name="p2">Вторая точка условного отрезка</param>
+            <param name="distance">Расстояние в перпендикулярном направлении от отрезка</param>
+        </member>
+        <member name="M:ModPlus.Helpers.GeometryHelpers.GetPerpendicularPoint3d(Autodesk.AutoCAD.Geometry.Point3d,Autodesk.AutoCAD.Geometry.Point3d,System.Double)">
+            <summary>Получение 3d точки на указанном расстоянии от условного отрезка, получаемого точками p1 и p2</summary>
+            <param name="p1">Первая точка условного отрезка</param>
+            <param name="p2">Вторая точка условного отрезка</param>
+            <param name="distance">Расстояние в перпендикулярном направлении от отрезка</param>
+        </member>
+        <member name="M:ModPlus.Helpers.GeometryHelpers.ConvertPoint2DToPoint3D(Autodesk.AutoCAD.Geometry.Point2d)">
+            <summary>Конвертирование 2Д точки в 3Д точку с нулевой ординатой z</summary>
+            <param name="point2D">Исходная 2Д точка</param>
+            <returns>Результирующая 3Д точка</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.GeometryHelpers.ConvertPoint3dToPoint2d(Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary>Конвертирование 3Д точки в 2Д точку</summary>
+            <param name="point3d">Исходная 3Д точка</param>
+            <returns>Результирующая 2Д точка</returns>
+        </member>
+        <member name="T:ModPlus.Helpers.GetFromAutoCAD">
+            <summary>
+            Методы получения различных данных из AutoCAD
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.GetFromAutoCAD.GetLenByTwoPoint(System.Boolean)">
+            <summary>Получения расстояния между двумя указанными точками в виде double</summary>
+            <param name="showError">Отображать окно ошибки (Exception) в случае возникновения</param>
+            <returns>Полученное расстояние или double.NaN в случае отмены или ошибки</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.GetFromAutoCAD.GetLenFromEntities(System.Double@)">
+            <summary>Получение суммы длин выбранных примитивов: отрезки, полилинии, дуги, сплайны, эллипсы</summary>
+            <param name="sumLen">Сумма длин выбранных примитивов</param>
+        </member>
+        <member name="M:ModPlus.Helpers.GetFromAutoCAD.GetLenFromEntities(System.Double@,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.Collections.Generic.List{System.Double}@,System.Collections.Generic.List{System.Collections.Generic.List{Autodesk.AutoCAD.DatabaseServices.ObjectId}}@)">
+            <summary>Получение суммы длин выбранных примитивов: отрезки, полилинии, дуги, сплайны, эллипсы</summary>
+            <param name="sumLen">Сумма длин всех примитивов</param>
+            <param name="entities">Поддерживаемые примитивы</param>
+            <param name="count">Количество примитивов</param>
+            <param name="lens">Сумма длин для каждого примитива</param>
+            <param name="objectIds">Список ObjectId выбранных примитивов</param>
+        </member>
+        <member name="T:ModPlus.Helpers.InsertToAutoCad">
+            <summary>
+            Функции вставки/добавления в AutoCAD
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.InsertToAutoCad.AddStringToAutoCadTableCell(System.String,System.String,System.Boolean)">
+            <summary>
+            Вставить строковое значение в ячейку таблицы AutoCAD
+            </summary>
+            <param name="firstStr">Первая строка. Замена разделителя действует только для неё</param>
+            <param name="secondString">Вторая строка. Необязательно. Замена разделителя не действует</param>
+            <param name="useSeparator">Использовать разделитель (для цифровых значений).
+            Заменяет запятую на точку, а затем на текущий разделитель</param>
+        </member>
+        <member name="M:ModPlus.Helpers.InsertToAutoCad.AddSpecificationItemToTableRow(ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable)">
+            <summary>
+            Вставка элемента спецификации в строку таблицы AutoCAD с выбором таблицы и указанием строки
+            </summary>
+            <param name="specificationItemForTable">Экземпляр вспомогательного элемента для заполнения строительной спецификации</param>
+        </member>
+        <member name="M:ModPlus.Helpers.InsertToAutoCad.AddSpecificationItemToTableRow(ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable,Autodesk.AutoCAD.DatabaseServices.Table,System.Int32)">
+            <summary>
+            Вставка элемента спецификации в указанную строку выбранной таблицы AutoCAD
+            </summary>
+            <param name="specificationItemForTable">Экземпляр вспомогательного элемента для заполнения строительной спецификации</param>
+            <param name="table">Таблица AutoCAD</param>
+            <param name="rowNumber">Номер строки для вставки элемента спецификации</param>
+            <remarks>Метод нужно вызывать внутри открытой транзакции и открытой на запись таблицы</remarks>
+        </member>
+        <member name="M:ModPlus.Helpers.InsertToAutoCad.AddSpecificationItemsToTable(System.Collections.Generic.List{ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable},System.Boolean)">
+            <summary>
+            Вставка нескольких элементов спецификации в таблицу AutoCAD с выбором таблицы
+            </summary>
+            <param name="specificationItemsForTable">Список экземпляров вспомогательного элемента для заполнения
+            строительной спецификации</param>
+            <param name="askForSelectRow">Указание пользователем строки, с которой начинается заполнение</param>
+            <remarks>Метод проверяет в таблице наличие нужного количества пустых строк и в случае их нехватки
+            добавляет новые</remarks>
+        </member>
+        <member name="M:ModPlus.Helpers.InsertToAutoCad.AddSpecificationItemsToTable(Autodesk.AutoCAD.DatabaseServices.Table,System.Int32,System.Collections.Generic.List{ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable})">
+            <summary>Вставка нескольких элементов спецификации в выбранную таблицу AutoCAD</summary>
+            <param name="table">Таблица AutoCAD</param>
+            <param name="rowNumber">Номер строки с которой начинается заполнение таблицы</param>
+            <param name="specificationItemsForTable">Список экземпляров вспомогательного элемента для заполнения строительной спецификации</param>
+            <remarks>Метод проверяет в таблице наличие нужного количества пустых строк и в случае их нехватки добавляет новые</remarks>
+            <remarks>Метод нужно вызывать внутри открытой транзакции и открытой на запись таблицы</remarks>
+        </member>
+        <member name="T:ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable">
+            <summary>Элемент для заполнения строительной спецификации</summary>
+        </member>
+        <member name="M:ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable.#ctor(System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>Инициализация экземпляра вспомогательного элемента для заполнения спецификации</summary>
+            <param name="position">Позиция</param>
+            <param name="designation">Обозначение</param>
+            <param name="name">Наименование</param>
+            <param name="mass">Масса</param>
+            <param name="count">Количество</param>
+            <param name="note">Примечание</param>
+        </member>
+        <member name="P:ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable.Position">
+            <summary>Позиция</summary>
+        </member>
+        <member name="P:ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable.Designation">
+            <summary>Обозначение</summary>
+        </member>
+        <member name="P:ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable.Name">
+            <summary>Наименование</summary>
+        </member>
+        <member name="P:ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable.Mass">
+            <summary>Масса</summary>
+        </member>
+        <member name="P:ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable.Count">
+            <summary>Количество</summary>
+        </member>
+        <member name="P:ModPlus.Helpers.InsertToAutoCad.SpecificationItemForTable.Note">
+            <summary>Примечание</summary>
+        </member>
+        <member name="M:ModPlus.Helpers.InsertToAutoCad.InsertDbText(System.String)">
+            <summary>Вставка однострочного текста</summary>
+            <param name="text">Содержимое однострочного текста</param>
+        </member>
+        <member name="M:ModPlus.Helpers.InsertToAutoCad.InsertMLeader(System.String,ModPlus.Helpers.AutocadHelpers.StandardArrowhead)">
+            <summary>Вставка мультивыноски</summary>
+            <param name="txt">Содержимое мультивыноски</param>
+            <param name="standardArrowhead">Стандартная стрелка. По умолчанию значение "_NONE"</param>
+        </member>
+        <member name="T:ModPlus.Helpers.LoadedPlugin">
+            <summary>
+            Загруженный плагин
+            </summary>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SupportedProduct">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.AvailProductExternalVersion">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.FullClassName">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.AppFullClassName">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.AddInId">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SmallIconUrl">
+            <summary>
+            Маленькая иконка
+            </summary>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SmallDarkIconUrl">
+            <summary>
+            Маленькая иконка для темной темы
+            </summary>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.BigIconUrl">
+            <summary>
+            Большая иконка
+            </summary>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.BigDarkIconUrl">
+            <summary>
+            Большая иконка для темной темы
+            </summary>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.Price">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.CanAddToRibbon">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.ToolTipHelpImage">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SubPluginsNames">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SubHelpImages">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SubClassNames">
+            <inheritdoc/>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SubSmallIconsUrl">
+            <summary>
+            Маленькие иконки под-команд
+            </summary>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SubSmallDarkIconsUrl">
+            <summary>
+            Маленькие иконки под-команд для темной темы
+            </summary>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SubBigIconsUrl">
+            <summary>
+            Большие иконки под-команд
+            </summary>
+        </member>
+        <member name="P:ModPlus.Helpers.LoadedPlugin.SubBigDarkIconsUrl">
+            <summary>
+            Большие иконки под-команд для темной темы
+            </summary>
+        </member>
+        <member name="T:ModPlus.Helpers.LoadPluginsHelper">
+            <summary>
+            Вспомогательные методы для загрузки плагинов
+            </summary>
+        </member>
+        <member name="F:ModPlus.Helpers.LoadPluginsHelper.LoadedFunctions">
+            <summary>
+            Список загруженных файлов в виде специального класса для последующего использования при построения ленты и меню
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.LoadPluginsHelper.GetDataFromFunctionInterface(System.Reflection.Assembly)">
+            <summary>
+            Чтение данных из интерфейса функции
+            </summary>
+            <param name="loadedFuncAssembly">Load assembly</param>
+        </member>
+        <member name="M:ModPlus.Helpers.LoadPluginsHelper.HasStampsPlugin(System.Int32,System.String@,System.String@)">
+            <summary>
+            Имеется ли плагин "Штампы"
+            </summary>
+            <param name="colorTheme">Тема оформления</param>
+            <param name="fieldsIcon">Иконка плагина "Поля"</param>
+            <param name="signaturesIcon">Иконка плагина "Подписи"</param>
+        </member>
+        <member name="M:ModPlus.Helpers.LoadPluginsHelper.HasStampsPlugin">
+            <summary>
+            Имеется ли плагин "Штампы"
+            </summary>
+        </member>
+        <member name="T:ModPlus.Helpers.RegistryMoveHelper">
+            <summary>
+            Вспомогательный класс для переноса данных в реестре. Сделан в отдельном файле, чтобы пере-использовать в других проектах
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.RegistryMoveHelper.Move">
+            <summary>
+            Выполнить перенос данных
+            </summary>
+        </member>
+        <member name="T:ModPlus.Helpers.RibbonCommandHandler">
+            <summary>
+            Обработчик нажатия кнопок на ленте
+            </summary>
+        </member>
+        <member name="E:ModPlus.Helpers.RibbonCommandHandler.CanExecuteChanged">
+            <inheritdoc />
+        </member>
+        <member name="M:ModPlus.Helpers.RibbonCommandHandler.CanExecute(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:ModPlus.Helpers.RibbonCommandHandler.Execute(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="T:ModPlus.Helpers.RibbonHelpers">
+            <summary>
+            Utils for Ribbon creation
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.RibbonHelpers.AddSmallButton(System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>Создание маленькой кнопки</summary>
+            <param name="fName">Название функции (= параметр запуска функции)</param>
+            <param name="lName">Локальное название функции</param>
+            <param name="img">Иконка</param>
+            <param name="description">Описание функции</param>
+            <param name="fullDescription">Полное описание</param>
+            <param name="helpImage">Имя файла картинки для ToolTip. Файл должен располагаться в каталоге /Resources/Help проекта</param>
+        </member>
+        <member name="M:ModPlus.Helpers.RibbonHelpers.AddSmallButton(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>Создание маленькой кнопки</summary>
+            <param name="fName">Название функции (= параметр запуска функции)</param>
+            <param name="lName">Локальное название функции</param>
+            <param name="img">Иконка</param>
+            <param name="description">Описание функции</param>
+            <param name="fullDescription">Полное описание</param>
+            <param name="helpImage">Имя файла картинки для ToolTip. Файл должен располагаться в каталоге /Resources/Help проекта</param>
+            <param name="helpLink">Ссылка онлайн-справки, не включающая https://modplus.org/. Если null, то справка строится по имени функции</param>
+        </member>
+        <member name="M:ModPlus.Helpers.RibbonHelpers.AddBigButton(System.String,System.String,System.String,System.String,System.Windows.Controls.Orientation,System.String,System.String)">
+            <summary>Создание большой кнопки</summary>
+            <param name="fName">Название функции (= параметр запуска функции)</param>
+            <param name="lName">Локальное название функции</param>
+            <param name="img">Иконка</param>
+            <param name="description">Описание функции</param>
+            <param name="orientation">Ориентация кнопки: горизонтальная или вертикальная</param>
+            <param name="fullDescription">Полное описание</param>
+            <param name="helpImage">Имя файла картинки для ToolTip. Файл должен располагаться в каталоге /Resources/Help проекта</param>
+        </member>
+        <member name="M:ModPlus.Helpers.RibbonHelpers.AddBigButton(System.String,System.String,System.String,System.String,System.Windows.Controls.Orientation,System.String,System.String,System.String)">
+            <summary>Создание большой кнопки</summary>
+            <param name="fName">Название функции (= параметр запуска функции)</param>
+            <param name="lName">Локальное название функции</param>
+            <param name="img">Иконка</param>
+            <param name="description">Описание функции</param>
+            <param name="orientation">Ориентация кнопки: горизонтальная или вертикальная</param>
+            <param name="fullDescription">Полное описание</param>
+            <param name="helpImage">Имя файла картинки для ToolTip. Файл должен располагаться в каталоге /Resources/Help проекта</param>
+            <param name="helpLink">Ссылка онлайн-справки, не включающая https://modplus.org/. Если null, то справка строится по имени функции</param>
+        </member>
+        <member name="T:ModPlus.Helpers.XDataHelpers">
+            <summary>
+            Вспомогательные методы для работы с расширенными данными (XData)
+            </summary>
+        </member>
+        <member name="M:ModPlus.Helpers.XDataHelpers.AddRegAppTableRecord(System.String)">
+            <summary>Добавление (регистрация) имени приложения</summary>
+            <param name="regAppName">Регистрационное имя приложения</param>
+        </member>
+        <member name="M:ModPlus.Helpers.XDataHelpers.SetStringXData(System.String,System.String)">
+            <summary>Добавление текстовых расширенных данных в именованный словарь</summary>
+            <param name="dictionaryName">Словарь</param>
+            <param name="value">Добавляемое значение</param>
+        </member>
+        <member name="M:ModPlus.Helpers.XDataHelpers.GetStringXData(System.String)">
+            <summary>Получение текстовых расширенных данных из указанного именованного словаря</summary>
+            <param name="dictionaryName">Словарь</param>
+            <returns>Строковое значение. В случае ошибки или отсутствия словаря возвращается string.Empty</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.XDataHelpers.HasXDataDictionary(System.String)">
+            <summary>Проверка наличия именованного словаря расширенных данных по имени</summary>
+            <param name="dictionaryName">Словарь</param>
+            <returns>True - словарь существует, False - словарь отсутствует или произошла ошибка</returns>
+        </member>
+        <member name="M:ModPlus.Helpers.XDataHelpers.DeleteStringXData(System.String)">
+            <summary>Удаление значения расширенных данных из именованного словаря. Поиск словаря происходит по указанному значению</summary>
+            <param name="value">Удаляемое значение</param>
+        </member>
+        <member name="T:ModPlus.MiniPlugins.EditWipeout">
+            <summary>
+            Редактировать маскировку
+            </summary>
+        </member>
+        <member name="M:ModPlus.MiniPlugins.EditWipeout.AddVertexToWipeout">
+            <summary>
+            Добавить вершину маскировке
+            </summary>
+        </member>
+        <member name="M:ModPlus.MiniPlugins.EditWipeout.RemoveVertexToWipeout">
+            <summary>
+            Удалить вершину маскировки
+            </summary>
+        </member>
+        <member name="T:ModPlus.MiniPlugins.MiniFunctions">
+            <summary>
+            Мини-функции
+            </summary>
+        </member>
+        <member name="M:ModPlus.MiniPlugins.MiniFunctions.LoadUnloadContextMenu">
+            <summary>
+            Включение/отключение всех контекстных меню мини-функций в зависимости от настроек
+            </summary>
+        </member>
+        <member name="M:ModPlus.MiniPlugins.MiniFunctions.UnloadAll">
+            <summary>
+            Отключить все контекстные меню
+            </summary>
+        </member>
+        <member name="M:ModPlus.MiniPlugins.MiniFunctionsContextMenuExtensions.BlockInsertion.InsertBlockRef(System.Int32,Autodesk.AutoCAD.DatabaseServices.Transaction,Autodesk.AutoCAD.DatabaseServices.Database,Autodesk.AutoCAD.EditorInput.Editor,Autodesk.AutoCAD.DatabaseServices.ObjectId)">
+            <summary>
+            Вставка блока с атрибутами
+            </summary>
+            <param name="promptCounter">0 - только вставка, 1 - с поворотом</param>
+            <param name="tr">Транзакция</param>
+            <param name="db">База данных чертежа</param>
+            <param name="ed">Editor</param>
+            <param name="blkdefid">ObjectId блока</param>
+        </member>
+        <member name="T:ModPlus.MiniPlugins.NestedEntitiesByBlock">
+            <summary>
+            Сделать вложения "ПоБлоку"
+            </summary>
+        </member>
+        <member name="M:ModPlus.MiniPlugins.NestedEntitiesByBlock.Start">
+            <summary>
+            Задать вхождения ПоБлоку
+            </summary>
+        </member>
+        <member name="T:ModPlus.MiniPlugins.NestedEntitiesLayer">
+            <summary>
+            Задать слой вложениям
+            </summary>
+        </member>
+        <member name="M:ModPlus.MiniPlugins.NestedEntitiesLayer.EntriesLayer">
+            <summary>
+            Задать слой вложениям
+            </summary>
+        </member>
+        <member name="T:ModPlus.MiniPlugins.ViewPortBoundariesToModelSpace">
+            <summary>
+            Создать границы видового экрана в пространстве модели
+            </summary>
+        </member>
+        <member name="T:ModPlus.Model.LineWeightWrapper">
+            <summary>
+            Обертка для <see cref="T:Autodesk.AutoCAD.DatabaseServices.LineWeight"/>
+            </summary>
+        </member>
+        <member name="M:ModPlus.Model.LineWeightWrapper.#ctor(System.String,Autodesk.AutoCAD.DatabaseServices.LineWeight)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ModPlus.Model.LineWeightWrapper"/> class.
+            </summary>
+            <param name="displayName">Отображаемое имя</param>
+            <param name="lineWeight">Соответствующий <see cref="T:Autodesk.AutoCAD.DatabaseServices.LineWeight"/></param>
+        </member>
+        <member name="P:ModPlus.Model.LineWeightWrapper.DisplayName">
+            <summary>
+            Отображаемое имя
+            </summary>
+        </member>
+        <member name="P:ModPlus.Model.LineWeightWrapper.LineWeight">
+            <summary>
+            Соответствующий <see cref="T:Autodesk.AutoCAD.DatabaseServices.LineWeight"/>
+            </summary>
+        </member>
+        <member name="T:ModPlus.ModPlus">
+            <inheritdoc />
+        </member>
+        <member name="P:ModPlus.ModPlus.IsCracked">
+            <summary>
+            Is current software cracked
+            </summary>
+        </member>
+        <member name="M:ModPlus.ModPlus.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:ModPlus.ModPlus.Terminate">
+            <inheritdoc/>
+        </member>
+        <member name="M:ModPlus.ModPlus.ComponentManager_ItemInitialized(System.Object,Autodesk.Windows.RibbonItemEventArgs)">
+            <summary>
+            Обработчик события, который проверяет, что построилась лента
+            И когда она построилась - уже грузим свою вкладку, если надо
+            </summary>
+        </member>
+        <member name="T:ModPlus.ModPlus.WebClientWithTimeout">
+            <inheritdoc />
+        </member>
+        <member name="M:ModPlus.ModPlus.WebClientWithTimeout.GetWebRequest(System.Uri)">
+            <inheritdoc/>
+        </member>
+        <member name="M:ModPlus.MpDrawings.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:ModPlus.MpDrawingsFunction.LoadMainMenu">
+            <summary>
+            Загрузка основного меню в зависимости от настроек
+            </summary>
+        </member>
+        <member name="T:ModPlus.MpPalette">
+            <summary>
+            Методы создания и работы с палитрой ModPlus
+            </summary>
+        </member>
+        <member name="T:ModPlus.VersionData">
+            <summary>
+            Данные, зависящие от версии
+            </summary>
+        </member>
+        <member name="T:ModPlus.Windows.FloatMenu">
+            <summary>
+            FloatMenu
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.FloatMenu.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.FloatMenuCommand.LoadMainMenu">
+            <summary>
+            Загрузка основного меню в зависимости от настроек
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.MiniPlugins.FastBlockSelection.#ctor(System.Collections.Generic.List{System.String})">
+            <summary>
+            Initializes a new instance of the <see cref="T:ModPlus.Windows.MiniPlugins.FastBlockSelection"/> class.
+            </summary>
+            <param name="validateNames"></param>
+        </member>
+        <member name="M:ModPlus.Windows.MiniPlugins.FastBlockSelection.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:ModPlus.Windows.MiniPlugins.FastBlocksSettings">
+            <summary>
+            FastBlocksSettings
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.MiniPlugins.FastBlocksSettings.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:ModPlus.Windows.MiniPlugins.FastBlocksSettings"/> class.
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.MiniPlugins.FastBlocksSettings.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:ModPlus.Windows.MiniPlugins.SelectLayer">
+            <summary>
+            Select layer window
+            </summary>
+            <summary>
+            SelectLayer
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.MiniPlugins.SelectLayer.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:ModPlus.Windows.MiniPlugins.SelectLayer"/> class.
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.MiniPlugins.SelectLayer.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.PaletteDrawings.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:ModPlus.Windows.PalettePlugins.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:ModPlus.XDataHelpersForProducts">
+            <summary>
+            Вспомогательные методы работы с расширенными данными для плагинов из раздела "Продукты ModPlus"
+            </summary>
+        </member>
+        <member name="M:ModPlus.XDataHelpersForProducts.IsModPlusProduct(Autodesk.AutoCAD.DatabaseServices.Entity)">
+            <summary>
+            Имеет ли примитив расширенные данные, указывающие, что это продукт ModPlus
+            </summary>
+            <param name="ent">Примитив</param>
+        </member>
+    </members>
+</doc>

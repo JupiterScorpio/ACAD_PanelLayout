@@ -1,0 +1,211 @@
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
+using PanelLayout_App.WallModule;
+using System;
+using System.Collections.Generic;
+
+namespace PanelLayout_App.ElevationModule
+{
+    internal sealed class ElevationHelper : ElevationBase
+    {
+        internal void CreateElevation(/*ProgressForm progressForm, string progressbarMsg*/)
+        {
+            Document document = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+            Editor editor = document.Editor;
+
+            PromptPointResult promptPointResult = editor.GetPoint("\n\n\n\nEnter elevation plan point:  ");
+
+            if (promptPointResult.Status == PromptStatus.OK)
+            {
+                BaseElevationPoint = promptPointResult.Value;
+                RibbonHelper.createElevationPlanButton.IsEnabled = false;
+                RibbonHelper.createHolecenterlineButton.IsEnabled = false;
+                ElevationOfWall();
+                RibbonHelper.rebuildPanelButton.IsEnabled = true;
+                RibbonHelper.updateWallButton.IsEnabled = true;
+            }
+        }
+        public static bool getWallDetails(string name, out int wallId, out int roomId, out bool intr, out bool ext, out bool lift, out bool stair,out bool duct)
+        {
+            string[] array = name.Split('_');
+            bool ret = false;
+
+            if (array.Length == 3)
+            {
+                wallId = Convert.ToInt32(array.GetValue(0).ToString().Substring(1));
+                string roomText = Convert.ToString(array.GetValue(1));
+                roomId = Convert.ToInt32(array.GetValue(2));
+                intr = (roomText == "R");
+                ext = (roomText == "EX");
+                lift = (roomText == "LF");
+                stair = (roomText == "ST");
+                duct = (roomText == "DU");
+                ret = true;
+            }
+            else
+            {
+                wallId = -1;
+                roomId = -1;
+                ext = false;
+                intr = false;
+                lift = false;
+                stair = false;
+                duct = false;
+            }
+
+            return ret;
+        }
+        internal static bool GetWallDetails(string name, out int wallId, out int roomId, out bool ext)
+        {
+            string[] array = name.Split('_');
+
+            if (array.Length == 3)
+            {
+                wallId = Convert.ToInt32(array[0].Substring(1));
+                string roomText = array[1];
+                ext = (roomText == "EX");
+                roomId = Convert.ToInt32(array[2]);
+
+                return true;
+            }
+            else
+            {
+                wallId = -1;
+                roomId = -1;
+                ext = false;
+
+                return false;
+            }
+        }
+
+        private void ElevationOfWall(/*ProgressForm progressForm, string progressbarMsg*/)
+        {
+            InitializeWallLines();
+
+            new CornerElevationHandler().Draw();
+
+            new PanelElevationHandler().Draw();
+
+
+        }
+
+        private void InitializeWallLines()
+        {
+            WallLines = new Dictionary<string, Tuple<Line, double, int, string>>();
+
+            int rm = 0;
+            double SecTxtSz = 100;
+
+            // Get External wall lines
+            for (int index = 0; index < ExternalWallHelper.listOfListOfExternalWallRoomLineId_With_WallName.Count; index++)
+            {
+                List<ObjectId> listOfExternalWallLineId = ExternalWallHelper.listOfListOfExternalWallRoomLineId_With_WallName[index];
+                double ln = 0.0;
+                string zKey = AEE_Utility.GetXDataRegisterAppName(listOfExternalWallLineId[0]);
+                string xDataRegAppName = zKey;
+
+                for (int index1 = 0; index1 < listOfExternalWallLineId.Count; index1++)
+                {
+                    xDataRegAppName = AEE_Utility.GetXDataRegisterAppName(listOfExternalWallLineId[index1]);
+                    Line line = AEE_Utility.GetLine(listOfExternalWallLineId[index1]);
+                    Point3d startPoint = BaseElevationPoint + new Vector3d(ln, -(rm * WallHeight + 500), 0);
+                    Point3d endPoint = startPoint + new Vector3d(line.Length + 2.0 * CommonModule.externalCorner, 0, 0);
+
+                    AEE_Utility.CreateLine(startPoint, endPoint, CommonModule.eleWallPanelLyrName, CommonModule.eleWallPanelLyrColor);
+                    AEE_Utility.CreateTextWithAngle(xDataRegAppName, (startPoint.X + endPoint.X) / 2.0, endPoint.Y - SecTxtSz, endPoint.Z, SecTxtSz,
+                                                    CommonModule.eleWallPanelLyrName, CommonModule.eleWallPanelLyrColor, 0);
+                    ln += CommonModule.externalCorner;
+                    WallLines.Add(xDataRegAppName, new Tuple<Line, double, int, string>(line, ln, rm, zKey));
+                    ln += 2000 + line.Length + CommonModule.externalCorner;
+                }
+
+                Tuple<Line, double, int, string> t = WallLines[zKey];
+                WallLines[zKey] = new Tuple<Line, double, int, string>(t.Item1, t.Item2, t.Item3, xDataRegAppName);
+                rm++;
+            }
+
+            // Get Internal wall lines
+            for (int index = 0; index < InternalWallHelper.listOfListOfInternalWallRoomLineId_With_WallName.Count; index++)
+            {
+                List<ObjectId> listOfInternalWallLineId = InternalWallHelper.listOfListOfInternalWallRoomLineId_With_WallName[index];
+                double ln = 0.0;
+                string zKey = AEE_Utility.GetXDataRegisterAppName(listOfInternalWallLineId[0]);
+                string xDataRegAppName = zKey;
+
+                for (int index1 = 0; index1 < listOfInternalWallLineId.Count; index1++)
+                {
+                    xDataRegAppName = AEE_Utility.GetXDataRegisterAppName(listOfInternalWallLineId[index1]);
+                    Line line = AEE_Utility.GetLine(listOfInternalWallLineId[index1]);
+                    WallLines.Add(xDataRegAppName, new Tuple<Line, double, int, string>(line, ln, rm, zKey));
+                    Point3d startPoint = BaseElevationPoint + new Vector3d(ln, -(rm * WallHeight + 500), 0);
+                    Point3d endPoint = startPoint + new Vector3d(line.Length, 0, 0);
+
+                    AEE_Utility.CreateLine(startPoint, endPoint, CommonModule.eleWallPanelLyrName, CommonModule.eleWallPanelLyrColor);
+                    AEE_Utility.CreateTextWithAngle(xDataRegAppName, (startPoint.X + endPoint.X) / 2.0, endPoint.Y - SecTxtSz, endPoint.Z, SecTxtSz,
+                                                    CommonModule.eleWallPanelLyrName, CommonModule.eleWallPanelLyrColor, 0);
+                    ln += 2000 + line.Length;
+                }
+
+                Tuple<Line, double, int, string> t = WallLines[zKey];
+                WallLines[zKey] = new Tuple<Line, double, int, string>(t.Item1, t.Item2, t.Item3, xDataRegAppName);
+                rm++;
+            }
+
+            // Get Duct wall lines
+            for (int index = 0; index < DuctHelper.listOfListOfDuctRoomLineId_With_WallName.Count; index++)
+            {
+                List<ObjectId> listOfWallLineId = DuctHelper.listOfListOfDuctRoomLineId_With_WallName[index];
+                double ln = 0.0;
+                string zKey = AEE_Utility.GetXDataRegisterAppName(listOfWallLineId[0]);
+                string xDataRegAppName = zKey;
+
+                for (int index1 = 0; index1 < listOfWallLineId.Count; index1++)
+                {
+                    xDataRegAppName = AEE_Utility.GetXDataRegisterAppName(listOfWallLineId[index1]);
+                    Line line = AEE_Utility.GetLine(listOfWallLineId[index1]);
+                    WallLines.Add(xDataRegAppName, new Tuple<Line, double, int, string>(line, ln, rm, zKey));
+                    Point3d startPoint = BaseElevationPoint + new Vector3d(ln, -(rm * WallHeight + 500), 0);
+                    Point3d endPoint = startPoint + new Vector3d(line.Length, 0, 0);
+
+                    AEE_Utility.CreateLine(startPoint, endPoint, CommonModule.eleWallPanelLyrName, CommonModule.eleWallPanelLyrColor);
+                    AEE_Utility.CreateTextWithAngle(xDataRegAppName, (startPoint.X + endPoint.X) / 2.0, endPoint.Y - SecTxtSz, endPoint.Z, SecTxtSz,
+                                                    CommonModule.eleWallPanelLyrName, CommonModule.eleWallPanelLyrColor, 0);
+                    ln += 2000 + line.Length;
+                }
+
+                Tuple<Line, double, int, string> t = WallLines[zKey];
+                WallLines[zKey] = new Tuple<Line, double, int, string>(t.Item1, t.Item2, t.Item3, xDataRegAppName);
+                rm++;
+            }
+
+            // Get Lift wall lines
+            for (int index = 0; index < LiftHelper.listOfListOfLiftRoomLineId_With_WallName.Count; index++)
+            {
+                List<ObjectId> listOfWallLineId = LiftHelper.listOfListOfLiftRoomLineId_With_WallName[index];
+                double ln = 0.0;
+                string zKey = AEE_Utility.GetXDataRegisterAppName(listOfWallLineId[0]);
+                string xDataRegAppName = zKey;
+
+                for (int index1 = 0; index1 < listOfWallLineId.Count; index1++)
+                {
+                    xDataRegAppName = AEE_Utility.GetXDataRegisterAppName(listOfWallLineId[index1]);
+                    Line line = AEE_Utility.GetLine(listOfWallLineId[index1]);
+                    WallLines.Add(xDataRegAppName, new Tuple<Line, double, int, string>(line, ln, rm, zKey));
+                    Point3d startPoint = BaseElevationPoint + new Vector3d(ln, -(rm * WallHeight + 500), 0);
+                    Point3d endPoint = startPoint + new Vector3d(line.Length, 0, 0);
+
+                    AEE_Utility.CreateLine(startPoint, endPoint, CommonModule.eleWallPanelLyrName, CommonModule.eleWallPanelLyrColor);
+                    AEE_Utility.CreateTextWithAngle(xDataRegAppName, (startPoint.X + endPoint.X) / 2.0, endPoint.Y - SecTxtSz, endPoint.Z, SecTxtSz,
+                                                    CommonModule.eleWallPanelLyrName, CommonModule.eleWallPanelLyrColor, 0);
+                    ln += 2000 + line.Length;
+                }
+
+                Tuple<Line, double, int, string> t = WallLines[zKey];
+                WallLines[zKey] = new Tuple<Line, double, int, string>(t.Item1, t.Item2, t.Item3, xDataRegAppName);
+                rm++;
+            }
+        }
+    }
+}

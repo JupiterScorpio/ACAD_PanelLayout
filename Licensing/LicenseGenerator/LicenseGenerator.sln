@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LicenseGenerator", "LicenseGenerator.csproj", "{B329651F-A9DC-414C-84B4-D11D6CC3C687}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LicenseDebugger", "..\LicenseDebugger\LicenseDebugger.csproj", "{C869E2B6-D694-4512-B84A-98C51F4B667E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B329651F-A9DC-414C-84B4-D11D6CC3C687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B329651F-A9DC-414C-84B4-D11D6CC3C687}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B329651F-A9DC-414C-84B4-D11D6CC3C687}.Debug|x64.ActiveCfg = Debug|x64
+		{B329651F-A9DC-414C-84B4-D11D6CC3C687}.Debug|x64.Build.0 = Debug|x64
+		{B329651F-A9DC-414C-84B4-D11D6CC3C687}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B329651F-A9DC-414C-84B4-D11D6CC3C687}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B329651F-A9DC-414C-84B4-D11D6CC3C687}.Release|x64.ActiveCfg = Release|x64
+		{B329651F-A9DC-414C-84B4-D11D6CC3C687}.Release|x64.Build.0 = Release|x64
+		{C869E2B6-D694-4512-B84A-98C51F4B667E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C869E2B6-D694-4512-B84A-98C51F4B667E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C869E2B6-D694-4512-B84A-98C51F4B667E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C869E2B6-D694-4512-B84A-98C51F4B667E}.Debug|x64.Build.0 = Debug|Any CPU
+		{C869E2B6-D694-4512-B84A-98C51F4B667E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C869E2B6-D694-4512-B84A-98C51F4B667E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C869E2B6-D694-4512-B84A-98C51F4B667E}.Release|x64.ActiveCfg = Release|Any CPU
+		{C869E2B6-D694-4512-B84A-98C51F4B667E}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

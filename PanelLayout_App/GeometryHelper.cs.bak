@@ -1,0 +1,513 @@
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using PanelLayout_App.CivilModel;
+using PanelLayout_App.WallModule;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PanelLayout_App
+{
+    public class GeometryHelper
+    {
+        public static double getHeightOfWall(string layerName, double standardPanelHeight, double slabBottom, double beamBottom, double SL, double RC, double slabThick, double kicker, double floorHeight, double internalCorner, ObjectId sunkanSlabId, out bool flagOfTopPanel)
+        {
+            flagOfTopPanel = false;
+
+            double heightOfWall = 0;
+            double standardWallHeight = standardPanelHeight;
+
+            if (beamBottom != 0)
+            {
+                if ((beamBottom + RC) < standardWallHeight)
+                {
+                    standardWallHeight = beamBottom - RC - internalCorner;
+                    heightOfWall = standardWallHeight;
+                }
+            }
+            else
+            {
+                if ((slabBottom - SL) <= standardWallHeight)
+                {
+                    standardWallHeight = slabBottom - RC - SL;
+                    heightOfWall = standardWallHeight;
+                }
+                heightOfWall = standardWallHeight;
+            }
+
+            double heightOfWallPanelX = 0;
+
+            if (InternalWallSlab_UI_Helper.IsInternalWall(layerName) || StairCase_UI_Helper.checkStairCaseLayerIsExist(layerName) || (Lift_UI_Helper.checkLiftLayerIsExist(layerName) && beamBottom != 0))
+            {
+                heightOfWallPanelX = getHeightOfWallPanelX_InternalWall(slabBottom, beamBottom, SL, heightOfWall, RC, internalCorner, sunkanSlabId, flagOfTopPanel);
+            }
+            else
+            {
+                heightOfWallPanelX = getHeightOfWallPanelX_ExternalWall(slabBottom, beamBottom, slabThick, heightOfWall, kicker, RC, sunkanSlabId, flagOfTopPanel);
+            }
+
+            double wallHeightCheckWithMaxWallHeight = 0.0;
+            if (InternalWallSlab_UI_Helper.IsInternalWall(layerName) || StairCase_UI_Helper.checkStairCaseLayerIsExist(layerName) || (Lift_UI_Helper.checkLiftLayerIsExist(layerName) && beamBottom != 0))
+            {
+                wallHeightCheckWithMaxWallHeight = heightOfWall + heightOfWallPanelX;
+            }
+            else
+            {
+                //wallHeightCheckWithMaxWallHeight = floorHeight + heightOfWallPanelX;
+                wallHeightCheckWithMaxWallHeight = floorHeight - kicker;
+            }
+
+            double wallHeight_With_RC = wallHeightCheckWithMaxWallHeight;
+            bool flagOfExternalSlab = ExternalSunkanSlab_UI_Helper.checkExternalSunkanSlabLayerIsExist(sunkanSlabId);
+            if (InternalWallSlab_UI_Helper.IsInternalWall(layerName) || StairCase_UI_Helper.checkStairCaseLayerIsExist(layerName) || flagOfExternalSlab == true)
+            {
+                var flagOfGreater = SunkanSlabHelper.checkSunkanSlabLevelDiffrnce_Is_Greater(sunkanSlabId);
+                if (PanelLayout_UI.flagOfPanelWithRC == true && flagOfGreater == false)
+                {
+                    double levelDifferenceOfSunkanSlb = SunkanSlabHelper.getSunkanSlabLevelDifference_WallPanel(sunkanSlabId);
+                    //wallHeight_With_RC = wallHeightCheckWithMaxWallHeight + RC + levelDifferenceOfSunkanSlb;
+                    //wallHeight_With_RC = wallHeightCheckWithMaxWallHeight + RC;
+                    wallHeight_With_RC = wallHeightCheckWithMaxWallHeight;
+                }
+            }
+
+            if (wallHeight_With_RC > PanelLayout_UI.maxHeightOfPanel)
+            {
+                heightOfWall = PanelLayout_UI.bottomSplitHeight;
+
+                if (InternalWallSlab_UI_Helper.IsInternalWall(layerName) || StairCase_UI_Helper.checkStairCaseLayerIsExist(layerName) || flagOfExternalSlab == true)
+                {
+                    var flagOfGreater = SunkanSlabHelper.checkSunkanSlabLevelDiffrnce_Is_Greater(sunkanSlabId);
+
+                    if (PanelLayout_UI.flagOfPanelWithRC == true && flagOfGreater == false)
+                    {
+                        heightOfWall = heightOfWall + RC; //TSK
+                        //heightOfWall = heightOfWall ; //TSK
+                    }
+                }
+                flagOfTopPanel = true;
+            }
+            else
+            {
+                heightOfWall = wallHeight_With_RC;
+            }
+
+            if (InternalWallSlab_UI_Helper.IsInternalWall(layerName))
+            {
+                PanelLayout_UI.int_wall_hgt = heightOfWall;
+            }
+            else
+            {
+                PanelLayout_UI.ext_wall_hgt = heightOfWall;
+            }
+            return heightOfWall;
+        }
+
+        public static double getHeightOfWallPanelX_InternalWall(double slabBottom, double beamBottom, double SL, double wallPanel, double RC, double internalCorner, ObjectId sunkanSlabId, bool flagOfTopPanel)
+        {
+            double heightOfWallPanelX = 0;
+            /*
+            // original code
+            if (beamBottom == 0)
+            {
+                heightOfWallPanelX = slabBottom - (wallPanel + RC + SL);
+            }
+            else
+            {
+                heightOfWallPanelX = beamBottom - (wallPanel + RC + internalCorner);
+            }
+          
+            heightOfWallPanelX = getHeightBeHalfOfSunkanSlab(sunkanSlabId, heightOfWallPanelX);
+            */
+            var levelDiff = SunkanSlabHelper.getSunkanSlabLevelDifference(sunkanSlabId);
+            if (beamBottom == 0)
+            {
+                if (levelDiff > CommonModule.minValueOfSunkanLevelDiffrce)
+                {
+                    levelDiff = levelDiff + RC;//TSK 06/06/2021
+                    heightOfWallPanelX = slabBottom - (wallPanel + SL + levelDiff); //TSK
+                }
+                else
+                {
+                    if (PanelLayout_UI.flagOfPanelWithRC == true)
+                    {
+                        heightOfWallPanelX = slabBottom - (wallPanel + SL); //TSK
+                    }
+                    else
+                    {
+                        heightOfWallPanelX = slabBottom - (wallPanel + SL + RC); //TSK
+                    }
+                }
+            }
+            else
+            {
+                if (levelDiff > CommonModule.minValueOfSunkanLevelDiffrce)
+                {
+                    levelDiff = levelDiff + RC;//TSK 06/06/2021
+                    heightOfWallPanelX = beamBottom - (wallPanel + internalCorner + levelDiff); //TSK
+                }
+                else
+                {
+                    if (PanelLayout_UI.flagOfPanelWithRC == true)
+                    {
+                        heightOfWallPanelX = beamBottom - (wallPanel + internalCorner); //TSK
+                    }
+                    else
+                    {
+                        heightOfWallPanelX = beamBottom - (wallPanel + internalCorner + SL);//TSK
+                    }
+                }
+            }
+
+
+            return heightOfWallPanelX;
+        }
+
+        public static double getHeightOfWallPanelX_LiftInternalWall(double slabBottom, double beamBottom, double SL, double wallPanel, double RC, double internalCorner, ObjectId sunkanSlabId)
+        {
+            double heightOfWallPanelX = 0;
+            /*
+            // original code
+            if (beamBottom == 0)
+            {
+                heightOfWallPanelX = slabBottom - (wallPanel + RC + SL);
+            }
+            else
+            {
+                heightOfWallPanelX = beamBottom - (wallPanel + RC + internalCorner);
+            }
+          
+            heightOfWallPanelX = getHeightBeHalfOfSunkanSlab(sunkanSlabId, heightOfWallPanelX);
+            */
+            var levelDiff = SunkanSlabHelper.getSunkanSlabLevelDifference(sunkanSlabId);
+            if (beamBottom == 0)
+            {
+                heightOfWallPanelX = slabBottom - (wallPanel + RC + SL + levelDiff);
+            }
+            else
+            {
+                heightOfWallPanelX = beamBottom - (wallPanel + RC + internalCorner + levelDiff);
+            }
+            return heightOfWallPanelX;
+        }
+
+
+        public static double getHeightOfWallPanelX_ExternalWall(double slabBottom, double beamBottom, double slabThick, double wallPanel, double kicker, double RC, ObjectId sunkanSlabId, bool flagOfTopPanel)
+
+        {
+            double heightOfWallPanelX = 0;
+            //beam on external wall is not suppoeted so beam bottom is always 0  
+            beamBottom = 0;
+
+            var flagOfGreater = SunkanSlabHelper.checkSunkanSlabLevelDiffrnce_Is_Greater(sunkanSlabId);
+            if (flagOfGreater == false && sunkanSlabId.IsValid == true)
+            {
+                kicker = kicker - RC;
+            }
+
+            if (beamBottom == 0)
+            {
+                // heightOfWallPanelX = (- kicker);//TSK
+                heightOfWallPanelX = PanelLayout_UI.floorHeight - (wallPanel + kicker);//TSK
+                //heightOfWallPanelX = (slabBottom + slabThick) - (wallPanel + kicker);
+            }
+            else
+            {
+                //heightOfWallPanelX = (- kicker);//TSK
+                //heightOfWallPanelX = (beamBottom + slabThick) - (wallPanel + kicker);
+                heightOfWallPanelX = beamBottom - (wallPanel + CommonModule.internalCorner);
+            }
+
+            heightOfWallPanelX = getHeightBeHalfOfSunkanSlab(sunkanSlabId, heightOfWallPanelX);
+
+            return heightOfWallPanelX;
+        }
+
+        public static double getHeightOfWindowWallPanelX_InternalWall(double slabBottom, double beamBottom, double windowLintelLevel, double SL, double internalCorner, ObjectId sunkanSlabId)
+        {
+            double heightOfWindowWallPanelX = 0;
+            if (beamBottom == 0)
+            {
+                heightOfWindowWallPanelX = slabBottom - (windowLintelLevel + SL);
+            }
+            else
+            {
+                heightOfWindowWallPanelX = beamBottom - (windowLintelLevel + internalCorner);
+            }
+
+            heightOfWindowWallPanelX = getHeightBeHalfOfSunkanSlab(sunkanSlabId, heightOfWindowWallPanelX);
+
+            return heightOfWindowWallPanelX;
+        }
+
+        public static double getHeightOfWindowWallPanelX_ExternalWall(double slabBottom, double beamBottom, double slabThick, double windowLintelLevel, double kicker, double RC)
+        {
+            double heightOfWindowWallPanelX = 0;
+            if (beamBottom == 0)
+            {
+                heightOfWindowWallPanelX = PanelLayout_UI.floorHeight - (windowLintelLevel + (kicker - RC));
+                //(slabBottom + slabThick) - (windowLintelLevel + (kicker - RC));//Fix EX WTP Ht by SDM 2022-08-04
+            }
+            else
+            {
+                heightOfWindowWallPanelX = (beamBottom + slabThick) - (windowLintelLevel + (kicker - RC));
+            }
+
+            return heightOfWindowWallPanelX;//Changes made on 30/06/2023 by PRT
+        }
+
+
+        public static double getHeightOfDoorWallPanelX_InternalWall(double slabBottom, double beamBottom, double doorLintelLevel, double SL, double RC, double internalCorner, ObjectId sunkanSlabId)
+        {
+            double heightOfDoorWallPanelX = 0;
+            if (beamBottom == 0)
+            {
+                heightOfDoorWallPanelX = slabBottom - (doorLintelLevel + SL);
+            }
+            else
+            {
+                heightOfDoorWallPanelX = beamBottom - (doorLintelLevel + internalCorner);
+            }
+            heightOfDoorWallPanelX = getHeightBeHalfOfSunkanSlab(sunkanSlabId, heightOfDoorWallPanelX);
+
+            return heightOfDoorWallPanelX;
+        }
+
+
+        public static double getHeightOfDoorWallPanelX_ExternalWall(double slabBottom, double beamBottom, double slabThick, double doorLintelLevel, double kicker, double RC)
+        {
+            double heightOfDoorWallPanelX = 0;
+            if (beamBottom == 0)
+            {
+                if (AEE_Utility.CustType == eCustType.IHPanel)
+                {
+                    heightOfDoorWallPanelX = PanelLayout_UI.floorHeight - (doorLintelLevel + (kicker - RC));
+                }
+                else
+                {
+                    heightOfDoorWallPanelX = PanelLayout_UI.floorHeight - doorLintelLevel;//Changes made on 30/06/2023 by PRT
+                }
+
+                //(slabBottom + slabThick) - (doorLintelLevel + (kicker - RC));//Fix Ht when floor ht changed by SDM 2022-08-10
+            }
+            else
+            {
+                if (AEE_Utility.CustType == eCustType.IHPanel)
+                {
+                    heightOfDoorWallPanelX = (beamBottom + slabThick) - (doorLintelLevel + (kicker - RC));
+                }
+                else
+                {
+                    heightOfDoorWallPanelX = (beamBottom + slabThick) - doorLintelLevel;
+                }
+
+            }
+
+            return heightOfDoorWallPanelX;
+            //PRT
+
+        }
+
+
+        public static double getHeightOfWall_EC_IC_InternallWall(string wallLayerName, double slabBottom, double beamBottom, double SL, double internalCorner, ObjectId sunkanSlabId)
+        {
+            double heightOfWall_EC_IC = 0;
+
+            var flagOfGreater = SunkanSlabHelper.checkSunkanSlabLevelDiffrnce_Is_Greater(sunkanSlabId);
+            if (flagOfGreater == true || slabBottom - SL > PanelLayout_UI.maxHeightOfCorner)
+            {
+                bool flagOfTopPanel = false;
+                heightOfWall_EC_IC = GeometryHelper.getHeightOfWall(wallLayerName, PanelLayout_UI.maxHeightOfPanel, InternalWallSlab_UI_Helper.getSlabBottom(wallLayerName), beamBottom, PanelLayout_UI.SL, PanelLayout_UI.RC, PanelLayout_UI.getSlabThickness(wallLayerName), PanelLayout_UI.kickerHt, PanelLayout_UI.floorHeight, CommonModule.internalCorner, sunkanSlabId, out flagOfTopPanel);
+
+                double heightOfWall_EC_IC_X = getHeightOfWallPanelX_InternalWall(InternalWallSlab_UI_Helper.getSlabBottom(wallLayerName), beamBottom, SL, heightOfWall_EC_IC, PanelLayout_UI.RC, internalCorner, sunkanSlabId, flagOfTopPanel);
+
+                return heightOfWall_EC_IC + heightOfWall_EC_IC_X;
+            }
+
+            if (beamBottom == 0)
+            {
+                heightOfWall_EC_IC = slabBottom - SL;
+            }
+            else
+            {
+                heightOfWall_EC_IC = beamBottom - internalCorner;
+            }
+
+            return heightOfWall_EC_IC;
+        }
+
+        public static double getHeightOfWall_EC_IC_ExternallWall(string wallLayerName, double slabBottom, double beamBottom, double slabThick, double RC, double kicker, double internalCorner, ObjectId sunkanSlabId)
+        {
+            double heightOfWall_EC_IC = 0;
+
+            var flagOfGreater = SunkanSlabHelper.checkSunkanSlabLevelDiffrnce_Is_Greater(sunkanSlabId);
+            if (flagOfGreater == true)
+            {
+                bool flagOfTopPanel = false;
+                heightOfWall_EC_IC = GeometryHelper.getHeightOfWall(wallLayerName, PanelLayout_UI.maxHeightOfPanel, InternalWallSlab_UI_Helper.getSlabBottom(wallLayerName), beamBottom, PanelLayout_UI.SL, PanelLayout_UI.RC, PanelLayout_UI.getSlabThickness(wallLayerName), PanelLayout_UI.kickerHt, PanelLayout_UI.floorHeight, CommonModule.internalCorner, sunkanSlabId, out flagOfTopPanel);
+
+                double heightOfWall_EC_IC_X = getHeightOfWallPanelX_ExternalWall(slabBottom, beamBottom, slabThick, heightOfWall_EC_IC, kicker, RC, sunkanSlabId, flagOfTopPanel);
+
+                return heightOfWall_EC_IC + heightOfWall_EC_IC_X;
+            }
+
+            if (beamBottom == 0)
+            {
+                heightOfWall_EC_IC = PanelLayout_UI.floorHeight - kicker;
+                //(slabBottom + slabThick) - kicker;//Fix EX IAX Ht by SDM 2022-08-04
+            }
+            else
+            {
+                heightOfWall_EC_IC = beamBottom - internalCorner;
+            }
+
+            return heightOfWall_EC_IC;
+        }
+
+
+        public static double getHeightOfWindow_InAtCornerSide_EC_IC_InternallWall(double sillLevel)
+        {
+            double heightOfWindow_EC_IC = sillLevel;
+
+            return heightOfWindow_EC_IC;
+        }
+        public static double getHeightOfWindow_InAtCornerSide_EC_IC_ExternallWall(double sillLevel, double RC)
+        {
+            double heightOfWindow_EC_IC = sillLevel - RC;
+
+            return heightOfWindow_EC_IC;
+        }
+
+        public static double getHeightOfWindowX_InAtCornerSide_EC_IC_InternallWall(double slabBottom, double beamBottom, double windowLintelLevel, double SL, double internalCorner)
+        {
+            double heightOfWindowX_EC_IC = 0;
+
+            if (beamBottom == 0)
+            {
+                heightOfWindowX_EC_IC = slabBottom - (windowLintelLevel + SL);
+            }
+            else
+            {
+                heightOfWindowX_EC_IC = beamBottom - (windowLintelLevel + internalCorner);
+            }
+
+            return heightOfWindowX_EC_IC;
+        }
+        public static double getHeightOfWindowX_InAtCornerSide_EC_IC_ExternallWall(double slabBottom, double slabThick, double beamBottom, double windowLintelLevel, double kicker, double RC)
+        {
+            double heightOfWindowX_EC_IC = 0;
+
+            if (beamBottom == 0)
+            {
+                heightOfWindowX_EC_IC = (slabBottom + slabThick) - (windowLintelLevel + (kicker - RC));
+            }
+            else
+            {
+                heightOfWindowX_EC_IC = (beamBottom + slabThick) - (windowLintelLevel + (kicker - RC));
+            }
+
+            return heightOfWindowX_EC_IC;
+        }
+
+
+        public static double getHeightOfDoorX_InAtCornerSide_EC_IC_InternallWall(double slabBottom, double beamBottom, double doorLintelLevel, double SL, double internalCorner)
+        {
+            double heightOfDoorX_EC_IC = 0;
+
+            if (beamBottom == 0)
+            {
+                heightOfDoorX_EC_IC = slabBottom - (doorLintelLevel + SL);
+            }
+            else
+            {
+                heightOfDoorX_EC_IC = beamBottom - (doorLintelLevel + internalCorner);
+            }
+
+            return heightOfDoorX_EC_IC;
+        }
+
+        public static double getHeightOfDoorX_InAtCornerSide_EC_IC_ExternallWall(double slabBottom, double beamBottom, double slabThick, double doorLintelLevel, double kicker, double RC)
+        {
+            double heightOfDoorX_EC_IC = 0;
+
+            if (beamBottom == 0)
+            {
+                heightOfDoorX_EC_IC = (slabBottom + slabThick) - (doorLintelLevel);
+            }
+            else
+            {
+                heightOfDoorX_EC_IC = (beamBottom + slabThick) - (doorLintelLevel + (kicker - RC));
+            }
+
+            return heightOfDoorX_EC_IC;
+        }
+
+
+        public static double getHeightOfWindow_InAtNotCornerSide_EC_In_InternalExternalWall(double windowLintelLevel, double windowSillLevel)
+        {
+            double cornerHeight = windowLintelLevel - (windowSillLevel + (CommonModule.internalCorner + CommonModule.doorWindowTopCornerHt));
+
+            return cornerHeight;
+        }
+
+        public static double getHeightOfWindow_InAtNotCornerSide_IC_In_InternalExternalWall(double wallPanelThickness,
+            double wallThickness, int cnt)
+        {
+            var mulitplier = cnt <= 2 ? 2 - cnt : 2;
+            double cornerHeight = (mulitplier * wallPanelThickness) + wallThickness;
+            cornerHeight = Math.Round(cornerHeight);
+            return cornerHeight;
+        }
+
+        public static double getHeightOfBeamSidePanel(double slabBottom, double beamBottom, double SL, bool flagOfSunkanSlab, ObjectId sunkanSlabId)
+        {
+            double levelDiffSunkan = 0;
+            if (flagOfSunkanSlab == true)
+            {
+                levelDiffSunkan = SunkanSlabHelper.getSunkanSlabLevelDifference(sunkanSlabId);
+            }
+            double heightOfBeamSidePanel = slabBottom - beamBottom - SL - levelDiffSunkan;
+
+            return heightOfBeamSidePanel;
+        }
+
+        public static double getHeightOfDoorCorner(string doorLayerName, double internalCorner)
+        {
+            double doorLintelLevel = Door_UI_Helper.getDoorLintelLevel(doorLayerName);
+            double cornerHght = doorLintelLevel - internalCorner;
+
+            return cornerHght;
+        }
+
+        public static double getHeightOfDoorPanelThick(string doorLayerName, double internalCorner, double RC, bool flagOfPanelWithRC)
+        {
+            double doorLintelLevel = Door_UI_Helper.getDoorLintelLevel(doorLayerName);
+            double panelHght = 0;
+
+            if (flagOfPanelWithRC == true)
+            {
+                panelHght = doorLintelLevel - internalCorner;
+            }
+            else
+            {
+                panelHght = doorLintelLevel - internalCorner - RC;
+            }
+
+            return panelHght;
+        }
+
+        private static double getHeightBeHalfOfSunkanSlab(ObjectId sunkanSlabId, double height)
+        {
+            var flagOfGreater = SunkanSlabHelper.checkSunkanSlabLevelDiffrnce_Is_Greater(sunkanSlabId);
+
+            if (flagOfGreater == false)
+            {
+                var levelDiff = SunkanSlabHelper.getSunkanSlabLevelDifference(sunkanSlabId);
+                height = height + levelDiff;
+            }
+
+            return height;
+        }
+    }
+}

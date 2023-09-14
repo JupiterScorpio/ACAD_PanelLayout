@@ -1,0 +1,89 @@
+﻿28/09/2019
+New[]. Draw internal and external corner. Arrange the entity as per layer.
+
+30/09/2019
+New[]. Internal corner drawing add in internal wall.
+
+01/10/2019
+New[]. External corner drawing add in internal wall.
+
+05/10/2019
+Enhance[]. Internal and external corner draw in internal wall.
+
+01/11/2019.
+New[]. Create shell plan corner's with perpendicular.
+
+14/11/2019
+New[]. Clear data button is created.
+
+20/11/2019
+New[]. Group created of window and wall panel. 
+New[]. Condition apply for minimum wall length.
+
+21/11/2019.
+New[]. Write text in window and wall panel.
+
+26/11/2019
+New[]. Window, Door, Beam and sunkan slab UI created.
+
+27/11/2019
+New[]. Window, Door, Beam and sunkan slab layer created.
+
+30/11/2019
+New[]. Beam is intersect to wall panel and write the wall X height in shell plan. 
+
+03/12/2019
+Enhance:- Window and wall panel text changed in dimension. 
+New[]. Beam is intersect to window wall panel and write the window wall X height in shell plan. 
+
+04/12/2019
+Enahnce[]. Formula changed of window wall panel X height. 
+
+05/18/2021
+CC Corner modified  by RTJ: 
+1. Width dimension on both sides made equal
+2. 2nd dimension in the string is replaced with Depth of CC
+3. CC Length is updated as per the CC Corner width dimension
+4. CC Corners which are linked with Beam are modified such that the largest width dimension is used for all.
+5. Settings: Apply button is disabled upon invoking the UI and enabled upon any changes in the UI.
+
+
+08/02/2022
+[enhance] considered  maxHeightOfPanel as  bottomSplitHeight + 300 for calculation.
+
+
+09-08-2022 to 15-08-2022
+1.data storage and unique data needs to be maintian for each documents.
+2.updating layer for special panels
+3.Updating text content for special panels
+4.Source code copying from one source to anoter source that related issue fixing.
+5.Horizontal centerline creation for special panels with specific logics
+
+
+24-9-2022 to 25-9-2022
+1.LCX &CCX centerline creation
+
+12-15-2022 - Cuong
+Fix DeckPanel issue 
+
+03/07/2023 
+Added Panel Depth 65 in kicker Corner in it is convex.(In Elevation).
+
+05/07/2023
+Changed varible (l2) by CommonModule.doorWindowTopCornerHt in method Draw_DoorWindowThickTopCorner.
+Swaped values in text of corner in Elevation if cust type is WNPanel.
+Changed CommonModule.internalCorner variable to CommonModule.doorWindowTopCornerHt (in Draw door thick Panel method).
+
+07/07/2023
+Changed Deck Panel Length As per default dp panel length value in Excel.(Changes made in getListOfDeckPanelStandardSpanLength method)
+
+10/07/2023
+Min Value for deck Panel is set to 300.If value is less than 300 then the value is substract from previous deck panel.
+
+13/07/2023
+New Variable is created(BeamSideMaxPanelLength) for Comparison.
+Changed PanelLayoutCodes.xlsx.
+Changes made if (heightOfBeamSidePanel <= PanelLayout_UI.standardPanelWidth).
+
+17/07/2023
+Extra Wall Panel was Added in elavation ,so condition is added.

@@ -1,0 +1,8 @@
+D:\SD\PanelLayout\PanelLayout_SD_WIP\PanelLayout_App\obj\WNRelease\PanelLayout_App.csproj.AssemblyReference.cache
+D:\SD\PanelLayout\PanelLayout_SD_WIP\PanelLayout_App\obj\WNRelease\PanelLayout_App.csproj.ResolveComReference.cache
+D:\SD\PanelLayout\PanelLayout_SD_WIP\PanelLayout_App\obj\WNRelease\PanelLayout_App.ProgressForm.resources
+D:\SD\PanelLayout\PanelLayout_SD_WIP\PanelLayout_App\obj\WNRelease\PanelLayout_App.PanelLayout_UI.resources
+D:\SD\PanelLayout\PanelLayout_SD_WIP\PanelLayout_App\obj\WNRelease\PanelLayout_App.Properties.Resources.resources
+D:\SD\PanelLayout\PanelLayout_SD_WIP\PanelLayout_App\obj\WNRelease\PanelLayout_App.SettingUI.resources
+D:\SD\PanelLayout\PanelLayout_SD_WIP\PanelLayout_App\obj\WNRelease\PanelLayout_App.csproj.GenerateResource.cache
+D:\SD\PanelLayout\PanelLayout_SD_WIP\PanelLayout_App\obj\WNRelease\PanelLayout_App.csproj.CoreCompileInputs.cache

@@ -1,0 +1,290 @@
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using PanelLayout_App.ElevationModule;
+using PanelLayout_App.WallModule;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PanelLayout_App
+{
+
+    internal sealed class HoleCenterlineCreation : ElevationBase
+    {
+        //Vertical hole centerline creation
+        private void draw_vertical_Cline(Point3d startPoint, double dW, double dH)
+        {
+            try
+            {
+                Vector3d vector3dOffset = Vector3d.YAxis * dH;
+                Point3d offsetStartPoint = startPoint + vector3dOffset;
+
+
+                double pitch = 0;
+                if (dW >= 250)
+                {
+                    pitch = PanelLayout_UI.ver_max_pitch;
+                }
+                else if (dW < 250)
+                {
+                    pitch = PanelLayout_UI.ver_min_pitch;
+                }
+                double linecount = dW / pitch;
+                int max_line = Convert.ToInt32(Math.Floor(linecount));
+                double remian_dist = dW - ((pitch * max_line));
+
+                if (remian_dist < 50)
+                {
+                    max_line--;
+                    if (dW == 75)
+                    {
+                        double[] stpnts = new double[3];
+                        stpnts = startPoint.ToArray();
+                        Point3d stpnt = new Point3d((stpnts[0] + (dW/2)), (stpnts[1] - 100), (stpnts[2]));
+
+                        double[] edpnts = new double[3];
+                        edpnts = offsetStartPoint.ToArray();
+                        Point3d endpnt = new Point3d((edpnts[0] + (dW / 2)), (edpnts[1] + 100), (edpnts[2]));
+
+                        AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_ver, CommonModule.eleWallPanelLyrColor);
+                    }
+                }
+
+                for (int i = 0; i < max_line; i++)
+                {
+
+                    double[] stpnts = new double[3];
+                    stpnts = startPoint.ToArray();
+                    Point3d stpnt = new Point3d((stpnts[0] + (pitch * (i + 1))), (stpnts[1] - 100), (stpnts[2]));
+
+                    double[] edpnts = new double[3];
+                    edpnts = offsetStartPoint.ToArray();
+                    Point3d endpnt = new Point3d((edpnts[0] + (pitch * (i + 1))), (edpnts[1] + 100), (edpnts[2]));
+
+                    AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_ver, CommonModule.eleWallPanelLyrColor);
+                }
+            }
+            catch { }
+        }
+
+        List<Point3d> lst_cline_dist = new List<Point3d>();
+        //Creating Centerline for the wall panel
+        private void datum_Cline_creation(Point3d startPoint, Point3d endPoint, bool isinternal)
+        {
+            try
+            {
+                double initial_dist = 450;
+                double first_dist = PanelLayout_UI.f_dist;
+                double top_dist = 100;
+                double wall_hgt = PanelLayout_UI.int_wall_hgt;
+
+                if (isinternal)
+                {
+                    initial_dist = 500;
+                }
+
+
+                double[] stpnts = new double[3];
+                stpnts = startPoint.ToArray();
+                Point3d stpnt = new Point3d((stpnts[0] - 100), (stpnts[1] + initial_dist), (stpnts[2]));
+
+                double[] edpnts = new double[3];
+                edpnts = endPoint.ToArray();
+                Point3d endpnt = new Point3d((edpnts[0] + 100), (edpnts[1] + initial_dist), (edpnts[2]));
+                AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.baselineMWallPanelLyrName, CommonModule.eleWallPanelLyrColor);
+                if (lst_cline_dist.Count > 0)
+                {
+                    lst_cline_dist.Add(stpnt);
+                }
+
+
+                stpnt = new Point3d((stpnts[0] - 100), (stpnts[1] + initial_dist + PanelLayout_UI.f_dist), (stpnts[2]));
+                endpnt = new Point3d((edpnts[0] + 100), (edpnts[1] + initial_dist + PanelLayout_UI.f_dist), (edpnts[2]));
+                AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+                if (lst_cline_dist.Count > 0)
+                {
+                    lst_cline_dist.Add(stpnt);
+                }
+
+
+                double line_count = (wall_hgt - first_dist) / PanelLayout_UI.sec_dist;
+                int max_line = Convert.ToInt32(Math.Floor(line_count));
+
+                double remian_dist = wall_hgt - ((PanelLayout_UI.sec_dist * max_line) + first_dist);
+                if (remian_dist <= 50)
+                {
+                    max_line--;
+                }
+
+                for (int i = 0; i < max_line; i++)
+                {
+                    stpnt = new Point3d((stpnts[0] - 100), (stpnts[1] + initial_dist + PanelLayout_UI.f_dist + PanelLayout_UI.sec_dist * (i + 1)), (stpnts[2]));
+                    endpnt = new Point3d((edpnts[0] + 100), (edpnts[1] + initial_dist + PanelLayout_UI.f_dist + PanelLayout_UI.sec_dist * (i + 1)), (edpnts[2]));
+                    AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+                    if (lst_cline_dist.Count > 0)
+                    {
+                        lst_cline_dist.Add(stpnt);
+                    }
+                }
+
+                bool isfromtop = false;
+
+
+                if (remian_dist > 200)
+                {
+                    stpnt = new Point3d((stpnts[0] - 100), (stpnts[1] + initial_dist + (wall_hgt - top_dist)), (stpnts[2]));
+                    endpnt = new Point3d((edpnts[0] + 100), (edpnts[1] + initial_dist + (wall_hgt - top_dist)), (edpnts[2]));
+                    AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+                    isfromtop = true;
+                    if (lst_cline_dist.Count > 0)
+                    {
+                        lst_cline_dist.Add(stpnt);
+                    }
+                }
+                else if (remian_dist <= 50)
+                {
+                    stpnt = new Point3d((stpnts[0] - 100), (stpnts[1] + initial_dist + (wall_hgt - top_dist)), (stpnts[2]));
+                    endpnt = new Point3d((edpnts[0] + 100), (edpnts[1] + initial_dist + (wall_hgt - top_dist)), (edpnts[2]));
+                    AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+                    isfromtop = true;
+                    if (lst_cline_dist.Count > 0)
+                    {
+                        lst_cline_dist.Add(stpnt);
+                    }
+                }
+
+                if (!isinternal)
+                {
+                    double inside_wall_gap = 0;
+                    if (isfromtop)
+                    {
+                        inside_wall_gap = remian_dist - 100;
+                    }
+
+                    double val = PanelLayout_UI.ext_wall_hgt - (PanelLayout_UI.f_dist - 50) - (PanelLayout_UI.sec_dist * max_line) - inside_wall_gap;
+
+
+                    if (val > 200)
+                    {
+                        stpnt = new Point3d((stpnts[0] - 100), (stpnts[1] + initial_dist + 50 + (PanelLayout_UI.ext_wall_hgt - top_dist)), (stpnts[2]));
+                        endpnt = new Point3d((edpnts[0] + 100), (edpnts[1] + initial_dist + 50 + (PanelLayout_UI.ext_wall_hgt - top_dist)), (edpnts[2]));
+                        AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+                    }
+
+                    double endht = (stpnts[1] + initial_dist + 50 + (PanelLayout_UI.ext_wall_hgt)) + PanelLayout_UI.kicker;
+
+                    double remain = endht - ((stpnts[1] + initial_dist + 50 + (PanelLayout_UI.ext_wall_hgt - top_dist)) + PanelLayout_UI.f_dist);
+
+                    if (remain >= 50)
+                    {
+                        stpnt = new Point3d((stpnts[0] - 100), ((stpnts[1] + initial_dist + 50 + (PanelLayout_UI.ext_wall_hgt - top_dist)) + PanelLayout_UI.f_dist), (stpnts[2]));
+                        endpnt = new Point3d((edpnts[0] + 100), ((stpnts[1] + initial_dist + 50 + (PanelLayout_UI.ext_wall_hgt - top_dist)) + PanelLayout_UI.f_dist), (edpnts[2]));
+                        AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+                    }
+                    else
+                    {
+                        stpnt = new Point3d((stpnts[0] - 100), ((stpnts[1] + initial_dist + 50 + (PanelLayout_UI.ext_wall_hgt)) + (PanelLayout_UI.kicker / 2)), (stpnts[2]));
+                        endpnt = new Point3d((edpnts[0] + 100), ((stpnts[1] + initial_dist + 50 + (PanelLayout_UI.ext_wall_hgt)) + (PanelLayout_UI.kicker / 2)), (edpnts[2]));
+                        AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+                    }
+                }
+                else
+                {
+
+
+                    double endht = (stpnts[1] + initial_dist + (wall_hgt)) + PanelLayout_UI.SL;
+
+                    double remain = endht - ((stpnts[1] + initial_dist + (wall_hgt - top_dist)) + PanelLayout_UI.f_dist);
+
+                    if (remain >= 50)
+                    {
+                        stpnt = new Point3d((stpnts[0] - 100), ((stpnts[1] + initial_dist + (wall_hgt - top_dist)) + PanelLayout_UI.f_dist), (stpnts[2]));
+                        endpnt = new Point3d((edpnts[0] + 100), ((stpnts[1] + initial_dist + (wall_hgt - top_dist)) + PanelLayout_UI.f_dist), (edpnts[2]));
+                        AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+
+                    }
+                    else
+                    {
+                        stpnt = new Point3d((stpnts[0] - 100), ((stpnts[1] + initial_dist + (wall_hgt) + (PanelLayout_UI.SL / 2))), (stpnts[2]));
+                        endpnt = new Point3d((edpnts[0] + 100), ((stpnts[1] + initial_dist + (wall_hgt)) + (PanelLayout_UI.SL / 2)), (edpnts[2]));
+                        AEE_Utility.CreateLine(stpnt, endpnt, CommonModule.clineWallPanelLyrName_hor, CommonModule.eleWallPanelLyrColor);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        public void createCline()
+        {
+            WallLines = new Dictionary<string, Tuple<Line, double, int, string>>();
+            lst_cline_dist = new List<Point3d>();
+
+            int rm = 0;
+            double SecTxtSz = 100;
+            // Get External wall lines
+            for (int index = 0; index < ExternalWallHelper.listOfListOfExternalWallRoomLineId_With_WallName.Count; index++)
+            {
+                List<ObjectId> listOfExternalWallLineId = ExternalWallHelper.listOfListOfExternalWallRoomLineId_With_WallName[index];
+                double ln = 0.0;
+            
+
+                for (int index1 = 0; index1 < listOfExternalWallLineId.Count; index1++)
+                {
+                  
+                    Line line = AEE_Utility.GetLine(listOfExternalWallLineId[index1]);
+                    Point3d startPoint = BaseElevationPoint + new Vector3d(ln, -(rm * WallHeight + 500), 0);
+                    Point3d endPoint = startPoint + new Vector3d(line.Length + 2.0 * CommonModule.externalCorner, 0, 0);
+
+               
+                    datum_Cline_creation(startPoint, endPoint, false);
+
+                    ln += CommonModule.externalCorner;
+                   
+                    ln += 1000 + line.Length + CommonModule.externalCorner;
+                }
+
+               
+                rm++;
+            }
+        
+
+            // Get Internal wall lines
+            for (int index = 0; index < InternalWallHelper.listOfListOfInternalWallRoomLineId_With_WallName.Count; index++)
+            {
+                List<ObjectId> listOfInternalWallLineId = InternalWallHelper.listOfListOfInternalWallRoomLineId_With_WallName[index];
+                double ln = 0.0;
+             
+             
+
+                for (int index1 = 0; index1 < listOfInternalWallLineId.Count; index1++)
+                {
+                   
+                    Line line = AEE_Utility.GetLine(listOfInternalWallLineId[index1]);
+                    Point3d startPoint = BaseElevationPoint + new Vector3d(ln, -(rm * WallHeight + 500), 0);
+                    Point3d endPoint = startPoint + new Vector3d(line.Length, 0, 0);
+
+                    datum_Cline_creation(startPoint, endPoint, true);
+
+                    ln += 1000 + line.Length;
+
+                }
+
+                
+                rm++;
+            }
+
+
+            //Vertical Cline Creation
+
+            for (int i = 0; i < CommonModule.vert_cline_data.Count; i++)
+            {
+                draw_vertical_Cline(CommonModule.vert_cline_data[i].startpoint, CommonModule.vert_cline_data[i].widh, CommonModule.vert_cline_data[i].ht);
+            }
+
+        }
+    }
+}

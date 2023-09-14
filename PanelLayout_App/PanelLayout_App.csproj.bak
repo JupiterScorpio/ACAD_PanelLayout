@@ -1,0 +1,307 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C9C7CBC4-F08C-4B5F-B05D-DB875ED54E94}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PanelLayout_App</RootNamespace>
+    <AssemblyName>PanelLayout_App</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AcCoreMgd, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AcCoreMgd.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcCui, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AcCui.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcDbMgd, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AcDbMgd.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acdbmgdbrep, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\acdbmgdbrep.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcDx, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AcDx.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcExportLayoutEx">
+      <HintPath>C:\Program Files\Autodesk\2018\AutoCAD 2018\AcExportLayoutEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcMgd, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AcMgd.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcMPolygonMGD">
+      <HintPath>C:\Program Files\Autodesk\2018\AutoCAD 2018\AcMPolygonMGD.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcMr, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AcMr.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcTcMgd, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AcTcMgd.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AcWindows, Version=21.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AcWindows.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AdWindows, Version=2015.11.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoCAD-2017.Net.Base.1.0.0\lib\net46\AdWindows.dll</HintPath>
+      <Private>True</Private>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1000\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\packages\Microsoft.Office.Interop.Word.15.0.4797.1003\lib\net20\Microsoft.Office.Interop.Word.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Office, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\packages\MicrosoftOfficeCore.15.0.0\lib\net35\Office.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PresentationCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Autodesk\AutoCAD_2022\AutoCAD 2022\PresentationCore.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BaseAreaFinder.cs" />
+    <Compile Include="BOMHelper.cs" />
+    <Compile Include="CivilModel\Beam_UI_Helper.cs" />
+    <Compile Include="CivilModel\Door_UI_Helper.cs" />
+    <Compile Include="CivilModel\InternalWallSlab_UI_Helper.cs" />
+    <Compile Include="CivilModel\ExternalSunkanSlab_UI_Helper.cs" />
+    <Compile Include="CivilModel\Lift_UI_Helper.cs" />
+    <Compile Include="CivilModel\Parapet_UI_Helper.cs" />
+    <Compile Include="CivilModel\StairCase_UI_Helper.cs" />
+    <Compile Include="CivilModel\InternalSunkanSlab_UI_Helper.cs" />
+    <Compile Include="CivilModel\Window_UI_Helper.cs" />
+    <Compile Include="Comparers\ComparerSettings.cs" />
+    <Compile Include="Comparers\DoubleComparer.cs" />
+    <Compile Include="Comparers\PointComparer.cs" />
+    <Compile Include="CreateShellPlanHelper.cs" />
+    <Compile Include="ElevationModule\CornerElevationHandler.cs" />
+    <Compile Include="ElevationModule\ElevationBase.cs" />
+    <Compile Include="ElevationModule\ElevationHelper.cs" />
+    <Compile Include="ElevationModule\Identifier.cs" />
+    <Compile Include="ElevationModule\PanelElevationHandler.cs" />
+    <Compile Include="EntityJigger1 .cs" />
+    <Compile Include="GeometryHelper.cs" />
+    <Compile Include="Licensing\CryptoHelper.cs" />
+    <Compile Include="Licensing\LicenseData.cs" />
+    <Compile Include="Licensing\LicenseUtilities.cs" />
+    <Compile Include="Licensing\MacAddressUtility.cs" />
+    <Compile Include="Licensing\Utilities.cs" />
+    <Compile Include="MaxNeighboursFinder.cs" />
+    <Compile Include="MaxRectFinder.cs" />
+    <Compile Include="PartHelper.cs" />
+    <Compile Include="AEE_Utility.cs" />
+    <Compile Include="CommandModule.cs" />
+    <Compile Include="CommonModule.cs" />
+    <Compile Include="ProgressForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProgressForm.Designer.cs">
+      <DependentUpon>ProgressForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RectangleAreaFinder.cs" />
+    <Compile Include="RibbonHelper.cs" />
+    <Compile Include="RotationHelper.cs" />
+    <Compile Include="CornerHelper.cs" />
+    <Compile Include="CheckShellPlanHelper.cs" />
+    <Compile Include="PanelLayout_UI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PanelLayout_UI.Designer.cs">
+      <DependentUpon>PanelLayout_UI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SettingUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingUI.Designer.cs">
+      <DependentUpon>SettingUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SplittedAreaFinder.cs" />
+    <Compile Include="WallModule\BeamHelper.cs" />
+    <Compile Include="WallModule\DeckPanelHelper.cs" />
+    <Compile Include="WallModule\DoorHelper.cs" />
+    <Compile Include="WallModule\DuctHelper.cs" />
+    <Compile Include="WallModule\ExternalWallHelper.cs" />
+    <Compile Include="WallModule\InternalWallHelper.cs" />
+    <Compile Include="WallModule\KickerHelper.cs" />
+    <Compile Include="WallModule\LiftHelper.cs" />
+    <Compile Include="WallModule\OverlapExternalDoorCorners.cs" />
+    <Compile Include="WallModule\ParaphetHelper.cs" />
+    <Compile Include="WallModule\RebuildHelper.cs" />
+    <Compile Include="WallModule\SlabJointHelper.cs" />
+    <Compile Include="WallModule\StairCaseHelper.cs" />
+    <Compile Include="WallModule\SunkanSlabHelper.cs" />
+    <Compile Include="WallModule\WallPanelHelper.cs" />
+    <Compile Include="WallModule\WindowHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DailyWork.txt" />
+    <Content Include="Images\CheckShellPlan.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\ClearData.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\CreateBOM.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\CreateShellPlan.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\InsertCorners.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\InsertDP.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\InsertElevations.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\InsertWP.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\ReBuild.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Settings.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\StairCase.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ProgressForm.resx">
+      <DependentUpon>ProgressForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PanelLayout_UI.resx">
+      <DependentUpon>PanelLayout_UI.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingUI.resx">
+      <DependentUpon>SettingUI.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Interop.Excel">
+      <Guid>{00020813-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>7</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="VBIDE">
+      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>3</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

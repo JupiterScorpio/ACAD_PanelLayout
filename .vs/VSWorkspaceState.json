@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\PanelLayout_App",
+    "\\PanelLayout_App\\CivilModel",
+    "\\PanelLayout_App\\ElevationModule",
+    "\\PanelLayout_App\\WallModule"
+  ],
+  "SelectedNode": "\\PanelLayout_App\\ElevationModule\\ElevationHelper.cs",
+  "PreviewInSolutionExplorer": false
+}

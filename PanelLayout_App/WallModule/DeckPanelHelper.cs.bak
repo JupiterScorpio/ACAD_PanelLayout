@@ -1,0 +1,974 @@
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace PanelLayout_App.WallModule
+{
+    public class DeckPanelHelper
+    {
+        public static List<List<ObjectId>> listOfListOfDeckPanelWallId = new List<List<ObjectId>>();
+        public static List<MaxAreaRelationInfo> lstMaxAreaRelations = new List<MaxAreaRelationInfo>();
+        public static List<List<double>> listOfListOfDeckPanelSpanLngth = new List<List<double>>();
+        public static List<List<double>> listOfListOfIntrvalLengthOfDeckPanel = new List<List<double>>();
+        public static List<List<double>> listOfListOfDeckPlane_SF_Interval = new List<List<double>>();
+
+        public void setDeckPanelWall(ObjectId wallId, double panelDepth)
+        {
+            AEE_Utility.changeVisibility(wallId, false);
+
+            string xDataRegAppName = AEE_Utility.GetXDataRegisterAppName(wallId);
+
+            var listOfDeckPanelId = getDeckPanel(wallId);
+            foreach (KeyValuePair<ObjectId, MaxAreaRelationInfo> deckPanelWallId in listOfDeckPanelId)
+            {
+                AEE_Utility.AttachXData(deckPanelWallId.Key, xDataRegAppName, CommonModule.xDataAsciiName);
+                setDeckPanelId(deckPanelWallId.Key, xDataRegAppName, deckPanelWallId.Value);
+            }
+        }
+
+        private Dictionary<ObjectId, MaxAreaRelationInfo> getDeckPanel(ObjectId insideWallId)
+        {
+            var listOfDeckPanelId = new Dictionary<ObjectId, MaxAreaRelationInfo>();
+
+            var listOfDeckPanelExplodeId = AEE_Utility.ExplodeEntity(insideWallId);
+
+            if (listOfDeckPanelExplodeId.Count == 4)
+            {
+                listOfDeckPanelId[insideWallId] = null;
+            }
+
+            //if (listOfDeckPanelExplodeId.Count == 6)
+            //{
+            //    double offsetValue = 10;
+
+            //    List<double> listOfDeckWallLength = new List<double>();
+            //    foreach (var wallLineId in listOfDeckPanelExplodeId)
+            //    {
+            //        double wallLineLngth = AEE_Utility.GetLengthOfLine(wallLineId);
+            //        listOfDeckWallLength.Add(wallLineLngth);
+            //    }
+
+            //    double minLength = listOfDeckWallLength.Min();
+            //    int indexOfMinLngth = listOfDeckWallLength.IndexOf(minLength);
+            //    ObjectId minLngthWallLineId = listOfDeckPanelExplodeId[indexOfMinLngth];
+
+            //    ObjectId prvsWallLineId = new ObjectId();
+            //    ObjectId nextWallLineId = new ObjectId();
+            //    getMinLengthLineId(indexOfMinLngth, listOfDeckPanelExplodeId, out minLngthWallLineId, out prvsWallLineId, out nextWallLineId);
+
+            //    ObjectId minLengthRectId = getMinLengthRectId(indexOfMinLngth, insideWallId, prvsWallLineId, nextWallLineId, minLngthWallLineId, offsetValue);
+            //    ObjectId maxLengthRectId = getMaxLengthRectId(listOfDeckPanelExplodeId, insideWallId, minLengthRectId, minLngthWallLineId, prvsWallLineId, nextWallLineId, offsetValue);
+            //    if (minLengthRectId.IsValid == true)
+            //    {
+            //        listOfDeckPanelId[minLengthRectId]=maxLengthRectId;
+            //    }
+
+            //    if (maxLengthRectId.IsValid == true)
+            //    {
+            //        listOfDeckPanelId[maxLengthRectId] = ObjectId.Null;
+            //    }
+            //}
+
+            if (listOfDeckPanelExplodeId.Count > 4)
+            {
+                var pts = AEE_Utility.GetPolyLinePoints(insideWallId);
+                var insideWallEnt = AEE_Utility.GetEntityForRead(insideWallId);
+
+                var dic = RectangleAreaFinder.CreateRecngle1(pts, insideWallEnt.Layer, insideWallEnt.ColorIndex, false, CommonModule.deckPanelGap);
+                foreach (KeyValuePair<ObjectId, MaxAreaRelationInfo> pair in dic)
+                {
+                    listOfDeckPanelId[pair.Key] = pair.Value;
+                }
+
+                //createDeckPanelRect(insideWallId, listOfDeckPanelExplodeId);
+            }
+
+            AEE_Utility.deleteEntity(listOfDeckPanelExplodeId);
+
+            return listOfDeckPanelId;
+        }
+
+        private void createDeckPanelRect(ObjectId insideWallId, List<ObjectId> listOfDeckPlateExplodeId)
+        {
+            var listOfVerticePoint = AEE_Utility.GetPolylineVertexPoint(insideWallId);
+            double minX = listOfVerticePoint.Min(sortPoint => sortPoint.X);
+            double minY = listOfVerticePoint.Min(sortPoint => sortPoint.Y);
+            double maxX = listOfVerticePoint.Max(sortPoint => sortPoint.X);
+            double maxY = listOfVerticePoint.Max(sortPoint => sortPoint.Y);
+
+            double length1 = Math.Abs(minX - maxX);
+            double length2 = Math.Abs(minY - maxY);
+            double maxLength = Math.Max(length1, length2);
+            maxLength = maxLength + (maxLength / 2);
+
+            List<string> listOfPointWithAngle_X = new List<string>();
+            List<string> listOfPointWithAngle_Y = new List<string>();
+
+            CommonModule commonMod = new CommonModule();
+
+            foreach (var wallLineId in listOfDeckPlateExplodeId)
+            {
+                List<Point3d> listOfStrtEndPoint = commonMod.getStartEndPointOfLine(wallLineId);
+
+                Point3d startPnt = listOfStrtEndPoint[0];
+                Point3d endPoint = listOfStrtEndPoint[1];
+                var lineId = AEE_Utility.getLineId(startPnt, endPoint, false);
+                listOfStrtEndPoint = commonMod.getStartEndPointOfLine(lineId);
+                startPnt = listOfStrtEndPoint[0];
+                endPoint = listOfStrtEndPoint[1];
+
+                double wallLineAngle = AEE_Utility.GetAngleOfLine(lineId);
+                var point = AEE_Utility.get_XY(wallLineAngle, maxLength);
+
+                Point3d startPoint = new Point3d((startPnt.X - point.X), (startPnt.Y - point.Y), 0);
+                Point3d endPnt = new Point3d((endPoint.X + point.X), (endPoint.Y + point.Y), 0);
+
+                AEE_Utility.deleteEntity(lineId);
+            }
+        }
+
+        private void getMinLengthLineId(int indexOfMinLngth, List<ObjectId> listOfDeckPanelExplodeId, out ObjectId minLngthWallLineId, out ObjectId prvsWallLineId, out ObjectId nextWallLineId)
+        {
+            minLngthWallLineId = listOfDeckPanelExplodeId[indexOfMinLngth];
+
+            prvsWallLineId = new ObjectId();
+            nextWallLineId = new ObjectId();
+            if (indexOfMinLngth == 0)
+            {
+                prvsWallLineId = listOfDeckPanelExplodeId[(listOfDeckPanelExplodeId.Count - 1)];
+            }
+            else
+            {
+                prvsWallLineId = listOfDeckPanelExplodeId[(indexOfMinLngth - 1)];
+            }
+
+            if (indexOfMinLngth == (listOfDeckPanelExplodeId.Count - 1))
+            {
+                nextWallLineId = listOfDeckPanelExplodeId[0];
+            }
+            else
+            {
+                nextWallLineId = listOfDeckPanelExplodeId[(indexOfMinLngth + 1)];
+            }
+        }
+        private ObjectId getMinLengthRectId(int indexOfMinLngth, ObjectId insideWallId, ObjectId prvsWallLineId, ObjectId nextWallLineId, ObjectId minLngthWallLineId, double offsetValue)
+        {
+            ObjectId minLengthRectId = new ObjectId();
+
+            var minLngthWallOffstLineId = AEE_Utility.OffsetLine(minLngthWallLineId, offsetValue, false);
+            var minLngthWallOffstLineMidPoint = AEE_Utility.GetMidPoint(minLngthWallOffstLineId);
+            var flagOfInside = AEE_Utility.GetPointIsInsideThePolyline(insideWallId, minLngthWallOffstLineMidPoint);
+            if (flagOfInside == false)
+            {
+                AEE_Utility.deleteEntity(minLngthWallOffstLineId);
+                minLngthWallOffstLineId = AEE_Utility.OffsetLine(minLngthWallLineId, -offsetValue, false);
+            }
+
+            var listOfInsctPointOfPrvsLine = AEE_Utility.InterSectionBetweenTwoEntity(minLngthWallOffstLineId, prvsWallLineId);
+            var listOfInsctPointOfNewLine = AEE_Utility.InterSectionBetweenTwoEntity(minLngthWallOffstLineId, nextWallLineId);
+
+            AEE_Utility.deleteEntity(minLngthWallOffstLineId);
+
+            ObjectId minLengthAdjacentLineId = new ObjectId();
+            if (listOfInsctPointOfPrvsLine.Count != 0 && listOfInsctPointOfNewLine.Count != 0)
+            {
+                double prvsWallLineLngth = AEE_Utility.GetLengthOfLine(prvsWallLineId);
+                double nextWallLineLngth = AEE_Utility.GetLengthOfLine(nextWallLineId);
+                if (prvsWallLineLngth > nextWallLineLngth)
+                {
+                    minLengthAdjacentLineId = nextWallLineId;
+                }
+                else
+                {
+                    minLengthAdjacentLineId = prvsWallLineId;
+                }
+            }
+            else if (listOfInsctPointOfPrvsLine.Count != 0 && listOfInsctPointOfNewLine.Count == 0)
+            {
+                minLengthAdjacentLineId = prvsWallLineId;
+            }
+            else if (listOfInsctPointOfNewLine.Count != 0 && listOfInsctPointOfPrvsLine.Count == 0)
+            {
+                minLengthAdjacentLineId = nextWallLineId;
+            }
+
+            if (minLengthAdjacentLineId.IsValid == true)
+            {
+                double minLengthAdjacentLineLngth = AEE_Utility.GetLengthOfLine(minLengthAdjacentLineId);
+
+                minLngthWallOffstLineId = AEE_Utility.OffsetLine(minLngthWallLineId, offsetValue, false);
+                minLngthWallOffstLineMidPoint = AEE_Utility.GetMidPoint(minLngthWallOffstLineId);
+                flagOfInside = AEE_Utility.GetPointIsInsideThePolyline(insideWallId, minLngthWallOffstLineMidPoint);
+                if (flagOfInside == false)
+                {
+                    AEE_Utility.deleteEntity(minLngthWallOffstLineId);
+                    minLngthWallOffstLineId = AEE_Utility.OffsetLine(minLngthWallLineId, -minLengthAdjacentLineLngth, false);
+                }
+                else
+                {
+                    minLngthWallOffstLineId = AEE_Utility.OffsetLine(minLngthWallLineId, minLengthAdjacentLineLngth, false);
+                }
+                minLengthRectId = drawMinLengthOfRectangle(insideWallId, minLngthWallLineId, minLngthWallOffstLineId);
+
+                AEE_Utility.deleteEntity(minLngthWallOffstLineId);
+            }
+            return minLengthRectId;
+        }
+        private ObjectId drawMinLengthOfRectangle(ObjectId insideWallId, ObjectId lineId1, ObjectId lineId2)
+        {
+            var insideWallEnt = AEE_Utility.GetEntityForRead(insideWallId);
+            List<Point3d> listOfLine_1_StrtEndPoint = AEE_Utility.GetStartEndPointOfLine(lineId1);
+            Point3d deckPnl_1_StrtPnt = listOfLine_1_StrtEndPoint[0];
+            Point3d deckPnl_1_EndPnt = listOfLine_1_StrtEndPoint[1];
+
+            List<Point3d> listOfLine_2_StrtEndPoint = AEE_Utility.GetStartEndPointOfLine(lineId2);
+            Point3d deckPnl_2_StrtPnt = listOfLine_2_StrtEndPoint[0];
+            Point3d deckPnl_2_EndPnt = listOfLine_2_StrtEndPoint[1];
+
+            ObjectId deckPanelRectId = AEE_Utility.GetRectangleId(deckPnl_1_StrtPnt, deckPnl_1_EndPnt, deckPnl_2_EndPnt, deckPnl_2_StrtPnt, insideWallEnt.Layer, insideWallEnt.ColorIndex, false);
+
+            return deckPanelRectId;
+        }
+
+        private ObjectId getMaxLengthRectId(List<ObjectId> listOfDeckPanelExplodeId, ObjectId insideWallId, ObjectId minLengthRectId, ObjectId minLngthWallLineId, ObjectId prvsWallLineId, ObjectId nextWallLineId, double offsetValue)
+        {
+            Point3d offsetRectPoint = new Point3d(123456, 123456, 0);
+            ObjectId minLengthOffstRectId = AEE_Utility.OffsetEntity_WithoutLine(offsetValue, offsetRectPoint, minLengthRectId, false);
+
+            List<ObjectId> listOfDeckPanelLineId = new List<ObjectId>();
+            List<double> listOfDeckPanelLineLngth = new List<double>();
+
+            foreach (var lineId in listOfDeckPanelExplodeId)
+            {
+                if (lineId == minLngthWallLineId || lineId == prvsWallLineId || lineId == nextWallLineId)
+                {
+
+                }
+                else
+                {
+                    var listOfInsctPoint = AEE_Utility.InterSectionBetweenTwoEntity(minLengthOffstRectId, lineId);
+                    if (listOfInsctPoint.Count == 0)
+                    {
+                        listOfDeckPanelLineId.Add(lineId);
+                        double lineLngth = AEE_Utility.GetLengthOfLine(lineId);
+                        listOfDeckPanelLineLngth.Add(lineLngth);
+                    }
+                }
+            }
+
+            double minLength = listOfDeckPanelLineLngth.Min();
+            int indexOfMinLngth = listOfDeckPanelLineLngth.IndexOf(minLength);
+            minLngthWallLineId = listOfDeckPanelLineId[indexOfMinLngth];
+
+            double maxLength = listOfDeckPanelLineLngth.Max();
+
+            var minLngthWallOffstLineId = AEE_Utility.OffsetLine(minLngthWallLineId, offsetValue, false);
+            var minLngthWallOffstLineMidPoint = AEE_Utility.GetMidPoint(minLngthWallOffstLineId);
+            var flagOfInside = AEE_Utility.GetPointIsInsideThePolyline(insideWallId, minLngthWallOffstLineMidPoint);
+            if (flagOfInside == false)
+            {
+                AEE_Utility.deleteEntity(minLngthWallOffstLineId);
+                minLngthWallOffstLineId = AEE_Utility.OffsetLine(minLngthWallLineId, -maxLength, false);
+            }
+            else
+            {
+                minLngthWallOffstLineId = AEE_Utility.OffsetLine(minLngthWallLineId, maxLength, false);
+            }
+
+            ObjectId maxLengthRectId = drawMinLengthOfRectangle(insideWallId, minLngthWallLineId, minLngthWallOffstLineId);
+
+            AEE_Utility.deleteEntity(minLngthWallLineId);
+            AEE_Utility.deleteEntity(minLngthWallOffstLineId);
+            AEE_Utility.deleteEntity(minLengthOffstRectId);
+
+            return maxLengthRectId;
+        }
+        private void setDeckPanelId(ObjectId deckPanelWallId, string xDataRegAppName, MaxAreaRelationInfo nearestRectId)
+        {
+            var listOfDeckPanelExplodeId = AEE_Utility.ExplodeEntity(deckPanelWallId);
+
+            WindowHelper windowHlp = new WindowHelper();
+            List<ObjectId> listOfMinLengthExplodeLine = windowHlp.getMinLengthOfWindowLineSegment(listOfDeckPanelExplodeId);
+            List<ObjectId> listOfMaxLengthExplodeLine = windowHlp.getMaxLengthOfWindowLineSegment(listOfDeckPanelExplodeId);
+
+            var spanLength = AEE_Utility.GetLengthOfLine(listOfMaxLengthExplodeLine[0]);
+            spanLength = Math.Round(spanLength);
+            ObjectId minLengthId = getMinLengthId(listOfMinLengthExplodeLine);
+
+            bool enableSF = false;
+            var stdLength = spanLength + 2 * CommonModule.internalCorner;
+            if (CommonModule.deckPanel_SP1_MaxLngth > stdLength)
+            {
+                spanLength = AEE_Utility.GetLengthOfLine(listOfMinLengthExplodeLine[0]);
+                spanLength = Math.Round(spanLength);
+                minLengthId = getMinLengthId(listOfMaxLengthExplodeLine);
+                //enableSF = true;
+            }
+
+            setDeckPanelLineId(xDataRegAppName, deckPanelWallId, minLengthId, spanLength, nearestRectId, enableSF);
+
+            AEE_Utility.deleteEntity(listOfDeckPanelExplodeId);
+        }
+
+        private ObjectId getMinLengthId(List<ObjectId> listOfMinLengthExplodeLine)
+        {
+            List<double> listOfMinCoOrdinate = new List<double>();
+
+            ObjectId minLengthId1 = listOfMinLengthExplodeLine[0];
+            var listOfMinLengthEnt1 = AEE_Utility.GetStartEndPointOfLine(minLengthId1);
+
+            var minLength1_Angle = AEE_Utility.GetAngleOfLine(minLengthId1);
+
+            ObjectId minLengthId2 = listOfMinLengthExplodeLine[1];
+            var listOfMinLengthEnt2 = AEE_Utility.GetStartEndPointOfLine(minLengthId2);
+
+            bool flag_X_Axis = true;
+            bool flag_Y_Axis = false;
+            CommonModule commonMod = new CommonModule();
+            commonMod.checkAngleOfLine_Axis(minLength1_Angle, out flag_X_Axis, out flag_Y_Axis);
+
+            int indexOfLngth = 0;
+            ObjectId lengthLineId = new ObjectId();
+            if (flag_X_Axis == true)
+            {
+                double minLngth_1_Y = listOfMinLengthEnt1.Min(sortPoint => sortPoint.Y);
+                double minLngth_2_Y = listOfMinLengthEnt2.Min(sortPoint => sortPoint.Y);
+
+                listOfMinCoOrdinate.Add(minLngth_1_Y);
+                listOfMinCoOrdinate.Add(minLngth_2_Y);
+
+                double minLength = listOfMinCoOrdinate.Min();
+                indexOfLngth = listOfMinCoOrdinate.IndexOf(minLength);
+                lengthLineId = listOfMinLengthExplodeLine[indexOfLngth];
+            }
+            else if (flag_Y_Axis == true)
+            {
+                double minLngth_1_X = listOfMinLengthEnt1.Min(sortPoint => sortPoint.X);
+                double minLngth_2_X = listOfMinLengthEnt2.Min(sortPoint => sortPoint.X);
+
+                listOfMinCoOrdinate.Add(minLngth_1_X);
+                listOfMinCoOrdinate.Add(minLngth_2_X);
+
+                double minLength = listOfMinCoOrdinate.Min();
+                indexOfLngth = listOfMinCoOrdinate.IndexOf(minLength);
+                lengthLineId = listOfMinLengthExplodeLine[indexOfLngth];
+            }
+            return lengthLineId;
+        }
+
+        private void setDeckPanelLineId(string xDataRegAppName, ObjectId deckPlateWallId, ObjectId minLengthId, double spanLength, MaxAreaRelationInfo maxAreaRelation, bool enableSF)
+        {
+            List<double> listOfIntervalPanelLength = getListOfDeckPanelInterval(spanLength, PanelLayout_UI.standardPanelWidth);
+            listOfListOfIntrvalLengthOfDeckPanel.Add(listOfIntervalPanelLength);
+
+            List<double> listOfDeckPlane_SF_Interval = getListOfDeckPanelSpanLength(spanLength, CommonModule.deckPanel_SP1_StndrdLngth, CommonModule.deckPanel_SP1_MaxLngth, CommonModule.deckPanel_SP1_MinLngth, CommonModule.deckPanel_SF_Lngth);
+            listOfListOfDeckPlane_SF_Interval.Add(listOfDeckPlane_SF_Interval);
+
+            List<ObjectId> listOfDeckPanelWallId = new List<ObjectId>();
+
+            CommonModule commonMod = new CommonModule();
+            var listOfStrtEndPoint = commonMod.getStartEndPointOfLine(minLengthId);
+            var minLengthEnt = AEE_Utility.GetEntityForRead(minLengthId);
+
+            var startPt = listOfStrtEndPoint[0];
+            var endPt = listOfStrtEndPoint[1];
+
+            var newLineId = AEE_Utility.getLineId(minLengthEnt, startPt, endPt, false);
+            listOfDeckPanelWallId.Add(newLineId);
+            AEE_Utility.AttachXData(newLineId, xDataRegAppName, CommonModule.xDataAsciiName);
+
+            double newLineLngth = AEE_Utility.GetLengthOfLine(newLineId);
+            newLineLngth = Math.Round(newLineLngth);
+
+            var lyrName = AEE_Utility.GetLayerName(deckPlateWallId);
+
+            var maxLen = PanelLayout_UI.getSlabThickness(lyrName) <= 175 ? CommonModule.deckPanel_Span_MaxLngthForSLTLTOrEqual175 :
+                CommonModule.deckPanel_Span_MaxLngthForSLTGT175;
+            List<double> listOfWallSpanLength = getListOfDeckPanelStandardSpanLength(newLineLngth, CommonModule.deckPanel_Span_StndrdLngth, maxLen, CommonModule.deckPanel_Span_MinLngth, CommonModule.deckPanelGap, CommonModule.slabJointPanelDepth);
+            listOfListOfDeckPanelSpanLngth.Add(listOfWallSpanLength);
+
+            Point3d offsetPoint = new Point3d(1234521, 1234521, 0);
+            ObjectId deckPlateOffstOutsideWallId = AEE_Utility.OffsetEntity_WithoutLine(5, offsetPoint, deckPlateWallId, false);
+
+            double totalIntervalLength = 0;
+            for (int index = 0; index < listOfIntervalPanelLength.Count; index++)
+            {
+                double intervalLength = listOfIntervalPanelLength[index];
+                totalIntervalLength = totalIntervalLength + intervalLength;
+
+                var offsetId = AEE_Utility.OffsetLine(newLineId, totalIntervalLength, false);
+                var midPoint = AEE_Utility.GetMidPoint(offsetId);
+                var flagOfInside = AEE_Utility.GetPointIsInsideThePolyline(deckPlateOffstOutsideWallId, midPoint);
+                if (flagOfInside == false)
+                {
+                    AEE_Utility.deleteEntity(offsetId);
+                    offsetId = AEE_Utility.OffsetLine(newLineId, -totalIntervalLength, false);
+                    listOfDeckPanelWallId.Add(offsetId);
+                }
+                else
+                {
+                    listOfDeckPanelWallId.Add(offsetId);
+                }
+                AEE_Utility.AttachXData(offsetId, xDataRegAppName, CommonModule.xDataAsciiName);
+            }
+
+            AEE_Utility.deleteEntity(deckPlateOffstOutsideWallId);
+            lstMaxAreaRelations.Add(maxAreaRelation);
+            listOfListOfDeckPanelWallId.Add(listOfDeckPanelWallId);
+        }
+
+        private List<double> getListOfDeckPanelInterval(double lengthOfLine, double standardWallLngth)
+        {
+            List<double> listOfWallPanelLength = new List<double>();
+            if (lengthOfLine > standardWallLngth)
+            {
+                double qtyOfPanelWall = lengthOfLine / standardWallLngth;
+                double qtyOfStandardPanelWall = Math.Truncate(qtyOfPanelWall);
+                if ((qtyOfPanelWall % 1) != 0)
+                {
+                    double totalLength = qtyOfStandardPanelWall * standardWallLngth;
+                    double difference = Math.Abs(lengthOfLine - totalLength);
+                    double subtractLength = (standardWallLngth + difference) - PanelLayout_UI.minWidthOfPanel;
+                    if (difference < PanelLayout_UI.minWidthOfPanel)
+                    {
+                        for (int i = 0; i < qtyOfStandardPanelWall; i++)
+                        {
+                            if (i == (qtyOfStandardPanelWall - 1))
+                            {
+                                listOfWallPanelLength.Add((subtractLength));
+                            }
+                            else
+                            {
+                                listOfWallPanelLength.Add(standardWallLngth);
+                            }
+                        }
+                        listOfWallPanelLength.Add(PanelLayout_UI.minWidthOfPanel);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < qtyOfStandardPanelWall; i++)
+                        {
+                            listOfWallPanelLength.Add(standardWallLngth);
+                        }
+                        listOfWallPanelLength.Add(difference);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < qtyOfStandardPanelWall; i++)
+                    {
+                        listOfWallPanelLength.Add(standardWallLngth);
+                    }
+                }
+            }
+            else
+            {
+                listOfWallPanelLength.Add(lengthOfLine);
+            }
+
+            if (listOfWallPanelLength.Count > 1)
+            {
+                var len = listOfWallPanelLength.Last() + listOfWallPanelLength[listOfWallPanelLength.Count - 2];
+                if (len > 450 && len <= 600)
+                {
+                    listOfWallPanelLength[listOfWallPanelLength.Count - 2] = 300;
+                    listOfWallPanelLength[listOfWallPanelLength.Count - 1] = len - 300;
+                }
+            }
+            return listOfWallPanelLength;
+        }
+
+        public List<double> getListOfDeckPanelSpanLength(double lengthOfLine, double span_StndrdLngth, double span_MaxLngth, double span_MinLngth, double deckPanelGap)
+        {
+            List<double> listOfDeckPanelSpanLength = new List<double>();
+
+            if (lengthOfLine > span_MaxLngth)
+            {
+                double qtyOfWallPanel = lengthOfLine / span_MaxLngth;
+                double propQty = Math.Truncate(qtyOfWallPanel);
+
+                if ((qtyOfWallPanel % 1) != 0)
+                {
+                    propQty = Math.Truncate(qtyOfWallPanel);
+                }
+                else
+                {
+                    propQty = qtyOfWallPanel - 1;
+                }
+
+                double remainingLength = lengthOfLine - (propQty * deckPanelGap);
+                double splitStdLengthApprox = remainingLength / (propQty + 1);
+                var splitStdLength = (splitStdLengthApprox % 50) != 0 ? (Math.Truncate(splitStdLengthApprox / 50) + 1) * 50 : splitStdLengthApprox;
+                var curLen = remainingLength;
+                while (curLen > 1e-06)
+                {
+                    var len = curLen > splitStdLength ? splitStdLength : curLen;
+                    curLen -= splitStdLength;
+                    listOfDeckPanelSpanLength.Add(len);
+                }
+            }
+            else
+            {
+                listOfDeckPanelSpanLength.Add(lengthOfLine);
+            }
+
+            return listOfDeckPanelSpanLength;
+        }
+
+        private List<double> getListOfDeckPanelStandardSpanLength(double lengthOfLine, double span_StndrdLngth, double span_MaxLngth, double span_MinLngth,
+                        double deckPanelGap, double slabJointPanelDepth)
+        {
+            List<double> listOfDeckPanelSpanLength = new List<double>();
+
+            if (lengthOfLine > span_MaxLngth)
+            {
+                double qtyOfWallPanel = lengthOfLine / span_MaxLngth;
+                double propQty = Math.Truncate(qtyOfWallPanel);
+
+                if ((qtyOfWallPanel % 1) != 0)
+                {
+                    propQty = Math.Truncate(qtyOfWallPanel);
+                }
+                else
+                {
+                    propQty = qtyOfWallPanel - 1;
+                }
+
+                double remainingLength = lengthOfLine - (propQty * deckPanelGap);
+                double splitStdLengthApprox = remainingLength / (propQty + 1);
+                var splitStdLength = (splitStdLengthApprox % 50) != 0 ? (Math.Truncate(splitStdLengthApprox / 50) + 1) * 50 : splitStdLengthApprox;
+                var curLen = remainingLength;
+                while (curLen > 1e-06)
+                {
+                    var len = curLen > splitStdLength ? splitStdLength : curLen;
+                    curLen -= splitStdLength;
+                    listOfDeckPanelSpanLength.Add(len);
+                }
+            }
+            else
+            {
+                listOfDeckPanelSpanLength.Add(lengthOfLine);
+            }
+
+            return listOfDeckPanelSpanLength;
+        }
+
+        private double checkLastDeckPlane_SpanLength(double totalLngthOfDeckPanel, double lengthOfLine, double deckPanelWallLngth, double deckPanelGap)
+        {
+            double deckPanelSpanLngth = deckPanelWallLngth;
+            totalLngthOfDeckPanel = totalLngthOfDeckPanel + deckPanelWallLngth + deckPanelGap;
+
+            double remainingLngth = lengthOfLine - totalLngthOfDeckPanel;
+
+            if (remainingLngth < 0)
+            {
+                double diff = deckPanelWallLngth + (deckPanelGap - Math.Abs(remainingLngth));
+                double equal = Math.Truncate(diff / 2);
+                if ((equal % 1) != 0)
+                {
+                    deckPanelSpanLngth = Math.Truncate(equal) + 1;
+                }
+                else
+                {
+                    deckPanelSpanLngth = equal;
+                }
+            }
+            return deckPanelSpanLngth;
+        }
+
+        //private List<double> getListOfDeckPlane_SF_Interval(double lengthOfLine, double sp1_StndrdLngth, double sp1_MaxLngth, double sp1_MinLngth, double deckPanel_SF_Lngth)
+        //{
+        //    List<double> listOfDeckPlane_SF_Interval = new List<double>();
+
+        //    if (lengthOfLine > sp1_StndrdLngth)
+        //    {
+        //        for (double totalLngthOfDeckPanel = 0; ;)
+        //        {
+        //            double remainingLngth = lengthOfLine - totalLngthOfDeckPanel;
+
+        //            if (totalLngthOfDeckPanel <= (lengthOfLine - sp1_StndrdLngth))
+        //            {
+        //                if (remainingLngth <= sp1_MaxLngth)
+        //                {
+        //                    listOfDeckPlane_SF_Interval.Add(remainingLngth);
+        //                    totalLngthOfDeckPanel = totalLngthOfDeckPanel + remainingLngth + deckPanel_SF_Lngth;
+        //                }
+        //                else if (remainingLngth > sp1_MaxLngth)
+        //                {
+        //                    listOfDeckPlane_SF_Interval.Add(sp1_MaxLngth);
+        //                    totalLngthOfDeckPanel = totalLngthOfDeckPanel + sp1_MaxLngth + deckPanel_SF_Lngth;
+        //                }
+        //                else if (remainingLngth <= sp1_StndrdLngth)
+        //                {
+        //                    listOfDeckPlane_SF_Interval.Add(sp1_StndrdLngth);
+        //                    totalLngthOfDeckPanel = totalLngthOfDeckPanel + sp1_StndrdLngth + deckPanel_SF_Lngth;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                if (remainingLngth > 0)
+        //                {
+        //                    if (listOfDeckPlane_SF_Interval.Count != 0)
+        //                    {
+        //                        int lastIndex = listOfDeckPlane_SF_Interval.Count - 1;
+        //                        double lastSpanLength = listOfDeckPlane_SF_Interval[lastIndex];
+
+        //                        //double diff = (sp1_MinLngth - remainingLngth);
+        //                        double totalSF_Intval = lastSpanLength + remainingLngth;
+
+        //                        double SF_Interval1 = 0;
+        //                        double SF_Interval2 = 0;
+        //                        double equalToSFIntrval = totalSF_Intval / 2;
+        //                        if ((totalSF_Intval % 1) == 0)
+        //                        {
+        //                            SF_Interval2 = Math.Truncate(equalToSFIntrval);
+        //                            SF_Interval1 = SF_Interval2 + 1;
+        //                        }
+        //                        else
+        //                        {
+        //                            SF_Interval2 = equalToSFIntrval;
+        //                            SF_Interval1 = equalToSFIntrval;
+        //                        }
+        //                        listOfDeckPlane_SF_Interval[lastIndex] = SF_Interval1;
+
+        //                        listOfDeckPlane_SF_Interval.Add(SF_Interval2);
+        //                    }
+        //                    else
+        //                    {
+        //                        listOfDeckPlane_SF_Interval.Add(remainingLngth);
+        //                    }
+        //                }
+        //                break;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        listOfDeckPlane_SF_Interval.Add(lengthOfLine);
+        //    }
+
+        //    return listOfDeckPlane_SF_Interval;
+        //}
+
+        public List<double> getListOfDeckPlane_SF_Interval(double lengthOfLine, double sp1_StndrdLngth, double sp1_MaxLngth, double sp1_MinLngth, double deckPanel_SF_Lngth)
+        {
+            List<double> listOfDeckPlane_SF_Interval = new List<double>();
+
+            if (lengthOfLine > sp1_StndrdLngth)
+            {
+                for (double totalLngthOfDeckPanel = 0; ;)
+                {
+                    double remainingLngth = lengthOfLine - totalLngthOfDeckPanel;
+
+                    if (totalLngthOfDeckPanel <= (lengthOfLine - sp1_StndrdLngth))
+                    {
+                        if (remainingLngth <= sp1_MaxLngth)
+                        {
+                            double deckPanelSFLngth = checkLastDeckPlane_SF_Interval(totalLngthOfDeckPanel, lengthOfLine, remainingLngth, deckPanel_SF_Lngth);
+                            listOfDeckPlane_SF_Interval.Add(deckPanelSFLngth);
+                            totalLngthOfDeckPanel = totalLngthOfDeckPanel + deckPanelSFLngth + deckPanel_SF_Lngth;
+                        }
+                        else if (remainingLngth > sp1_MaxLngth)
+                        {
+                            double deckPanelSFLngth = checkLastDeckPlane_SF_Interval(totalLngthOfDeckPanel, lengthOfLine, sp1_MaxLngth, deckPanel_SF_Lngth);
+                            listOfDeckPlane_SF_Interval.Add(deckPanelSFLngth);
+                            totalLngthOfDeckPanel = totalLngthOfDeckPanel + deckPanelSFLngth + deckPanel_SF_Lngth;
+                        }
+                        else if (remainingLngth <= sp1_StndrdLngth)
+                        {
+                            double deckPanelSFLngth = checkLastDeckPlane_SF_Interval(totalLngthOfDeckPanel, lengthOfLine, sp1_StndrdLngth, deckPanel_SF_Lngth);
+
+                            listOfDeckPlane_SF_Interval.Add(deckPanelSFLngth);
+                            totalLngthOfDeckPanel = totalLngthOfDeckPanel + deckPanelSFLngth + deckPanel_SF_Lngth;
+                        }
+                    }
+                    else
+                    {
+                        if (remainingLngth > 0)
+                        {
+                            if (remainingLngth <= sp1_MinLngth && listOfDeckPlane_SF_Interval.Count != 0)
+                            {
+                                int lastIndex = listOfDeckPlane_SF_Interval.Count - 1;
+                                double lastSpanLength = listOfDeckPlane_SF_Interval[lastIndex];
+
+                                double diff = sp1_MinLngth - remainingLngth;
+                                listOfDeckPlane_SF_Interval[lastIndex] = (lastSpanLength - diff);
+
+                                listOfDeckPlane_SF_Interval.Add(sp1_MinLngth);
+                            }
+                            else
+                            {
+                                listOfDeckPlane_SF_Interval.Add(remainingLngth);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                listOfDeckPlane_SF_Interval.Add(lengthOfLine);
+            }
+
+            return listOfDeckPlane_SF_Interval;
+        }
+
+        private double checkLastDeckPlane_SF_Interval(double totalLngthOfDeckPanel, double lengthOfLine, double deckPanelWallLngth, double deckPanel_SF_Lngth)
+        {
+            double deckPanelSFLngth = deckPanelWallLngth;
+            totalLngthOfDeckPanel = totalLngthOfDeckPanel + deckPanelWallLngth + deckPanel_SF_Lngth;
+
+            double remainingLngth = lengthOfLine - totalLngthOfDeckPanel;
+
+            if (remainingLngth < 0)
+            {
+                double diff = deckPanelWallLngth + (deckPanel_SF_Lngth - Math.Abs(remainingLngth));
+                double equal = Math.Truncate(diff / 2);
+                if ((equal % 1) != 0)
+                {
+                    deckPanelSFLngth = Math.Truncate(equal) + 1;
+                }
+                else
+                {
+                    deckPanelSFLngth = equal;
+                }
+            }
+
+            return deckPanelSFLngth;
+        }
+
+        public void drawDeckPlatePanel()
+        {
+            RibbonHelper.insertDeckPanelButton.IsEnabled = false;
+
+            string deckPanelCreationMsg = "Deck panels are creating....";
+            ProgressForm progressForm = new ProgressForm();
+            progressForm.Show();
+
+            for (int index = 0; index < listOfListOfDeckPanelWallId.Count; index++)
+            {
+                if ((index % 5) == 0)
+                {
+                    progressForm.ReportProgress(1, deckPanelCreationMsg);
+                }
+                List<double> listOfIntervalLngthDeckPanel = listOfListOfIntrvalLengthOfDeckPanel[index];
+                List<ObjectId> listOfDeckPanelWallId = listOfListOfDeckPanelWallId[index];
+                List<double> listOfDeckPanelSpanLngth = listOfListOfDeckPanelSpanLngth[index];
+                List<double> listOfDeckPlane_SF_Interval = listOfListOfDeckPlane_SF_Interval[index];
+
+                MaxAreaRelationInfo relation = lstMaxAreaRelations[index];
+
+                drawDeckPlate(listOfDeckPanelWallId, listOfDeckPanelSpanLngth, listOfIntervalLngthDeckPanel, listOfDeckPlane_SF_Interval, relation);
+            }
+
+            deckPanelCreationMsg = "Deck panels are created.";
+            progressForm.ReportProgress(100, deckPanelCreationMsg);
+            progressForm.Close();
+
+            if (!CommandModule.dply)
+                MessageBox.Show(deckPanelCreationMsg, CommonModule.headerText_messageBox, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.SendStringToExecute((String)RibbonHelper.rebuildPanelButton.CommandParameter, true, false, true);
+
+            if (Licensing.LicenseUtilities.hasElevation)
+                RibbonHelper.createElevationPlanButton.IsEnabled = true;
+            else
+                RibbonHelper.rebuildPanelButton.IsEnabled = true;
+        }
+
+        private void drawDeckPlate(List<ObjectId> listOfDeckPanelWallId, List<double> listOfDeckPanelSpanLngth,
+            List<double> listOfIntervalLngthDeckPanel, List<double> listOfDeckPlane_SF_Interval, MaxAreaRelationInfo relation)
+        {
+            //Vector3d moveVector = CreateShellPlanHelper.moveVector_ForSlabJointLayout;
+            Vector3d moveVector = new Vector3d(0, 0, 0);
+            for (int j = 0; j < listOfDeckPanelWallId.Count; j++)
+            {
+                if (j == (listOfDeckPanelWallId.Count - 1))
+                {
+                    break;
+                }
+                double deckPanelInterval = listOfIntervalLngthDeckPanel[j];
+
+                ObjectId deckPanelId1 = listOfDeckPanelWallId[j];
+                ObjectId deckPanelId2 = listOfDeckPanelWallId[(j + 1)];
+
+                string xDataRegAppName = AEE_Utility.GetXDataRegisterAppName(deckPanelId1);
+
+                drawDeckPanelRectangle(xDataRegAppName, j, deckPanelId1, deckPanelId2, listOfDeckPanelSpanLngth, listOfDeckPlane_SF_Interval, deckPanelInterval, moveVector, relation);
+            }
+        }
+
+        private void drawDeckPanelRectangle(string xDataRegAppName, int indexOfDeckPanelId, ObjectId deckPanelId1, ObjectId deckPanelId2, List<double> listOfDeckPanelSpanLngth, List<double> listOfDeckPlane_SF_Interval,
+            double deckPanelInterval, Vector3d moveVector, MaxAreaRelationInfo relation)
+        {
+            var deckPanelEnt = AEE_Utility.GetEntityForRead(deckPanelId1);
+            List<Point3d> listOfDeckPanel_1_StrtEndPoint = AEE_Utility.GetStartEndPointOfLine(deckPanelId1);
+            Point3d deckPnl_1_StrtPnt = listOfDeckPanel_1_StrtEndPoint[0];
+            Point3d deckPnl_1_EndPnt = listOfDeckPanel_1_StrtEndPoint[1];
+
+            List<Point3d> listOfDeckPanel_2_StrtEndPoint = AEE_Utility.GetStartEndPointOfLine(deckPanelId2);
+            Point3d deckPnl_2_StrtPnt = listOfDeckPanel_2_StrtEndPoint[0];
+            Point3d deckPnl_2_EndPnt = listOfDeckPanel_2_StrtEndPoint[1];
+
+            Point3d strtPoint1 = deckPnl_1_StrtPnt;
+            Point3d strtPoint2 = deckPnl_2_StrtPnt;
+
+            WallPanelHelper wallPanelHlp = new WallPanelHelper();
+
+            for (int j = 0; j < listOfDeckPanelSpanLngth.Count; j++)
+            {
+                double deckPanelSpanLength = listOfDeckPanelSpanLngth[j];
+                bool skipEntCreation = false;
+                if (deckPanelSpanLength < 0)
+                {
+                    deckPanelSpanLength = 0;
+                    skipEntCreation = true;
+                }
+                var angleOfLine = AEE_Utility.GetAngleOfLine(deckPnl_1_StrtPnt, deckPnl_1_EndPnt);
+                Point2d lengthPoint = AEE_Utility.get_XY(angleOfLine, deckPanelSpanLength);
+                Point3d endPoint1 = new Point3d((strtPoint1.X + lengthPoint.X), (strtPoint1.Y + lengthPoint.Y), 0);
+                Point3d endPoint2 = new Point3d((strtPoint2.X + lengthPoint.X), (strtPoint2.Y + lengthPoint.Y), 0);
+
+                if (!skipEntCreation)
+                {
+
+                    ObjectId deckWallLineId = AEE_Utility.getLineId(deckPanelEnt, strtPoint1, endPoint1, false);
+                    double deckWallLineAngle = AEE_Utility.GetAngleOfLine(deckWallLineId);
+
+                    List<ObjectId> listOfMoveId = new List<ObjectId>();
+
+                    var deckPanelRectId = AEE_Utility.createRectangle(strtPoint1, endPoint1, endPoint2, strtPoint2, CommonModule.deckPanelWallLayerName, CommonModule.deckPanelWallLayerColor);
+                    AEE_Utility.AttachXData(deckPanelRectId, xDataRegAppName, CommonModule.xDataAsciiName);
+                    listOfMoveId.Add(deckPanelRectId);
+
+                    Point3d dimTextPoint = WallPanelHelper.getCenterPointOfPanelRectangle(deckPanelRectId);
+
+                    string deckPanelText = getWallPanelText(deckPanelInterval, PanelLayout_UI.deckPanelName, deckPanelSpanLength);
+                    string wallDescp = deckPanelText;
+                    ObjectId dimTextId2 = wallPanelHlp.writeDimensionTextInWallPanel(deckPanelText, deckWallLineId, dimTextPoint, deckWallLineAngle, CommonModule.deckPanelWallTextLayerName, CommonModule.deckPanelWallLayerColor);
+                    listOfMoveId.Add(dimTextId2);
+
+                    wallPanelHlp.setBOMDataOfWallPanel(dimTextId2, deckPanelRectId, deckWallLineId, deckPanelInterval, 0, deckPanelSpanLength, PanelLayout_UI.deckPanelName, wallDescp, CommonModule.deckPanelType);
+
+                    AEE_Utility.MoveEntity(listOfMoveId, moveVector);
+                }
+
+                Point3d gapStrtPoint1 = endPoint1;
+                Point3d gapStrtPoint2 = endPoint2;
+
+                Point2d gapPoint = AEE_Utility.get_XY(angleOfLine, CommonModule.deckPanelGap);
+                Point3d gapEndPoint1 = new Point3d((gapStrtPoint1.X + gapPoint.X), (gapStrtPoint1.Y + gapPoint.Y), 0);
+                Point3d gapEndPoint2 = new Point3d((gapStrtPoint2.X + gapPoint.X), (gapStrtPoint2.Y + gapPoint.Y), 0);
+
+                if (j != (listOfDeckPanelSpanLngth.Count - 1))
+                {
+                    double angleOfSFDeckPanel = AEE_Utility.GetAngleOfLine(gapStrtPoint1, gapStrtPoint2);
+                    drawGapDeckPanelRectangle(xDataRegAppName, deckPanelEnt, indexOfDeckPanelId, listOfDeckPlane_SF_Interval, gapStrtPoint1, gapEndPoint1, angleOfSFDeckPanel, moveVector);
+                }
+
+                strtPoint1 = gapEndPoint1;
+                strtPoint2 = gapEndPoint2;
+            }
+            if (relation != null && indexOfDeckPanelId == 0)
+            {
+                var deckPlane_SF_Intervals = getListOfDeckPanelSpanLength(Math.Round(relation.DirectionLine.Length), CommonModule.deckPanel_SP1_StndrdLngth, CommonModule.deckPanel_SP1_MaxLngth, CommonModule.deckPanel_SP1_MinLngth, CommonModule.deckPanel_SF_Lngth);
+
+                var l = new Line(relation.DirectionLine.StartPoint, relation.DirectionLine.EndPoint);
+                var angle = l.Angle;
+                double degrees = (180 / Math.PI) * angle;
+                angle = Math.Round(degrees, 3);
+                //draw_SF_DeckPanelRectangle(xDataRegAppName, deckPanelEnt, gapEndPoint1, gapStrtPoint1, gapStrtPoint2, gapEndPoint2, angleOfSFDeckPanel, moveVector);
+                drawGapDeckPanelRectangle(xDataRegAppName, deckPanelEnt, indexOfDeckPanelId, deckPlane_SF_Intervals,
+                    relation.GapBaseLineSegment.StartPoint, relation.GapBaseLineSegment.EndPoint, angle, new Vector3d(0, 0, 0));
+            }
+        }
+
+        private void drawGapDeckPanelRectangle(string xDataRegAppName, Entity deckPanelEnt, int indexOfDeckPanelId, List<double> listOfDeckPlane_SF_Interval, Point3d gapStartPoint1, Point3d gapEndPnt1, double angleOfSFDeckPanel, Vector3d moveVector)
+        {
+            if (indexOfDeckPanelId == 0)
+            {
+                WallPanelHelper wallPanelHlp = new WallPanelHelper();
+                Point3d gapStrtPoint1 = gapStartPoint1;
+                Point3d gapEndPoint1 = gapEndPnt1;
+                for (int index = 0; index < listOfDeckPlane_SF_Interval.Count; index++)
+                {
+                    List<ObjectId> listOfMoveId = new List<ObjectId>();
+
+                    double SF_Interval = listOfDeckPlane_SF_Interval[index];
+                    Point2d SF_Point = AEE_Utility.get_XY(angleOfSFDeckPanel, SF_Interval);
+
+                    Point3d gapStrtPoint2 = new Point3d((gapStrtPoint1.X + SF_Point.X), (gapStrtPoint1.Y + SF_Point.Y), 0);
+                    Point3d gapEndPoint2 = new Point3d((gapEndPoint1.X + SF_Point.X), (gapEndPoint1.Y + SF_Point.Y), 0);
+
+                    ObjectId deckWallLineId = AEE_Utility.getLineId(deckPanelEnt, gapStrtPoint1, gapStrtPoint2, false);
+
+                    var deckPanelRectId = AEE_Utility.createRectangle(gapStrtPoint1, gapEndPoint1, gapEndPoint2, gapStrtPoint2, CommonModule.deckPanelWallLayerName, CommonModule.deckPanelWallLayerColor);
+                    AEE_Utility.AttachXData(deckPanelRectId, xDataRegAppName, CommonModule.xDataAsciiName);
+                    listOfMoveId.Add(deckPanelRectId);
+
+                    Point3d dimTextPoint = WallPanelHelper.getCenterPointOfPanelRectangle(deckPanelRectId);
+                    double deckPanelGap = CommonModule.deckPanelGap;
+                    string deckPanel_SP1_Name = PanelLayout_UI.deckPanel_SP1_Name;
+
+                    string deckPanelText = getWallPanelText(deckPanelGap, deckPanel_SP1_Name, SF_Interval);
+                    string wallDescp = deckPanelText;
+                    ObjectId dimTextId2 = wallPanelHlp.writeDimensionTextInWallPanel(deckPanelText, deckWallLineId, dimTextPoint, angleOfSFDeckPanel, CommonModule.deckPanelWallTextLayerName, CommonModule.deckPanelWallLayerColor);
+                    listOfMoveId.Add(dimTextId2);
+
+                    wallPanelHlp.setBOMDataOfWallPanel(dimTextId2, deckPanelRectId, deckWallLineId, deckPanelGap, 0, SF_Interval, deckPanel_SP1_Name, wallDescp, CommonModule.deckPanelType);
+                    AEE_Utility.MoveEntity(listOfMoveId, moveVector);
+
+                    Point2d SF_GapPoint = AEE_Utility.get_XY(angleOfSFDeckPanel, CommonModule.deckPanel_SF_Lngth);
+                    gapStrtPoint1 = new Point3d((gapStrtPoint2.X + SF_GapPoint.X), (gapStrtPoint2.Y + SF_GapPoint.Y), 0);
+                    gapEndPoint1 = new Point3d((gapEndPoint2.X + SF_GapPoint.X), (gapEndPoint2.Y + SF_GapPoint.Y), 0);
+
+                    if (index != (listOfDeckPlane_SF_Interval.Count - 1))
+                    {
+                        draw_SF_DeckPanelRectangle(xDataRegAppName, deckPanelEnt, gapEndPoint1, gapStrtPoint1, gapStrtPoint2, gapEndPoint2, angleOfSFDeckPanel, moveVector);
+                    }
+                }
+            }
+        }
+
+        private void draw_SF_DeckPanelRectangle(string xDataRegAppName, Entity deckPanelEnt, Point3d gapEndPoint1, Point3d gapStrtPoint1, Point3d gapStrtPoint2, Point3d gapEndPoint2, double angleOfSFDeckPanel, Vector3d moveVector)
+        {
+            WallPanelHelper wallPanelHlp = new WallPanelHelper();
+            List<ObjectId> listOfMoveId = new List<ObjectId>();
+
+            ObjectId deckWallLineId = AEE_Utility.getLineId(deckPanelEnt, gapStrtPoint1, gapStrtPoint2, false);
+            ObjectId deckPanelRectId = AEE_Utility.createRectangle(gapStrtPoint2, gapEndPoint2, gapEndPoint1, gapStrtPoint1, CommonModule.deckPanelWallLayerName, CommonModule.deckPanelWallLayerColor);
+            AEE_Utility.AttachXData(deckPanelRectId, xDataRegAppName, CommonModule.xDataAsciiName);
+            listOfMoveId.Add(deckPanelRectId);
+
+            Point3d dimTextPoint = WallPanelHelper.getCenterPointOfPanelRectangle(deckPanelRectId);
+
+            double deckPanel_SF_Lngth = CommonModule.deckPanel_SF_Lngth;
+            double deckPanelGap = CommonModule.deckPanelGap;
+            string deckPanel_SF_Name = PanelLayout_UI.deckPanel_SF_Name;
+            string deckPanelText = getWallPanelText(deckPanelGap, deckPanel_SF_Name, deckPanel_SF_Lngth);
+            string wallDescp = deckPanelText;
+            ObjectId dimTextId2 = wallPanelHlp.writeDimensionTextInWallPanel(deckPanelText, deckWallLineId, dimTextPoint, angleOfSFDeckPanel, CommonModule.deckPanelWallTextLayerName, CommonModule.deckPanelWallLayerColor);
+            listOfMoveId.Add(dimTextId2);
+
+            wallPanelHlp.setBOMDataOfWallPanel(dimTextId2, deckPanelRectId, deckWallLineId, deckPanelGap, 0, deckPanel_SF_Lngth, deckPanel_SF_Name, wallDescp, CommonModule.deckPanelType);
+
+            AEE_Utility.MoveEntity(listOfMoveId, moveVector);
+        }
+
+        public static string getWallPanelText(double length, string wallPanelName, double height)
+        {
+            ///Change 'Length WBH Height' to 'Height WBH Length' in SDM 11_May_2022
+            //string deckPanelText = Convert.ToString(length) + " " + wallPanelName + " " + Convert.ToString(height);
+            string deckPanelText = "";
+            if (wallPanelName == CommonModule.windowThickBottomPropText) 
+            deckPanelText = Convert.ToString(height) + " " + wallPanelName + " " + Convert.ToString(length);
+            else
+            deckPanelText = Convert.ToString(length) + " " + wallPanelName + " " + Convert.ToString(height);
+            return deckPanelText;
+        }
+    }
+}
